@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-
 const storageKey = "Items"
 const statuses = {
   WorkAt: "Work At",

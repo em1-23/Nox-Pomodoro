@@ -35,10 +35,10 @@ function loadTimer() {
     const validSession = Object.hasOwn(sessions, savedTimer.session)
     const validRemaining = Number.isSafeInteger(savedTimer.remainingSeconds)
       && savedTimer.remainingSeconds >= 0
+    const duration = Number(savedTimer.durationMinutes)
     const validDuration = savedTimer.durationMinutes === undefined
       || (typeof savedTimer.durationMinutes === "string"
         && (savedTimer.durationMinutes === "" || /^\d+$/.test(savedTimer.durationMinutes)))
-    const duration = Number(savedTimer.durationMinutes)
     const validDurationValue = savedTimer.durationMinutes === undefined
       || savedTimer.durationMinutes === ""
       || (Number.isSafeInteger(duration) && duration <= Math.floor(Number.MAX_SAFE_INTEGER / 60))
@@ -100,7 +100,7 @@ function loadTimer() {
   }
 }
 
-function FirstSection() {
+export default function FirstSection() {
   const [initialTimer] = useState(loadTimer)
   const [session, setSession] = useState(initialTimer.timer.session)
   const [remainingSeconds, setRemainingSeconds] = useState(initialTimer.timer.remainingSeconds)
@@ -260,6 +260,10 @@ function FirstSection() {
     }))
   }
 
+  // حساب النسبة المئوية للوقت المتبقي بناءً على المعادلة المطلوبة: (الوقت المتبقي / وقت التايمر الإجمالي) * 100
+  const totalDurationSeconds = durations[session] * 60
+  const percentage = totalDurationSeconds > 0 ? (remainingSeconds / totalDurationSeconds) * 100 : 0
+
   const hours = Math.floor(remainingSeconds / 3600)
   const minutes = Math.floor((remainingSeconds % 3600) / 60)
   const seconds = remainingSeconds % 60
@@ -281,7 +285,8 @@ function FirstSection() {
           {Object.entries(sessions).map(([key, { label }]) => (
             <button
               aria-pressed={session === key}
-              className="Link"
+              // أضفنا فئة "active" هنا إذا كان التبويب الحالي مطابقاً لـ key
+              className={`Link ${session === key ? "active" : ""}`}
               key={key}
               onClick={() => selectSession(key)}
               type="button"
@@ -290,11 +295,19 @@ function FirstSection() {
             </button>
           ))}
         </div>
-        <div className="Timer">
+        
+        {/* عنصر التايمر مع تطبيق الـ conic-gradient في الـ background بناءً على النسبة */}
+        <div 
+          className="Timer"
+          style={{
+            background: `conic-gradient(var(--SpecialColor) ${percentage}%, #fafafa ${percentage}%)`
+          }}
+        >
           <div className="Content">
             {timer}
           </div>
         </div>
+
         {storageError && <p role="alert">{storageError}</p>}
         <div className="Start">
           <button
@@ -358,5 +371,3 @@ function FirstSection() {
     </div>
   )
 }
-
-export default FirstSection

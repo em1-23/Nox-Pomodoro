@@ -1,10 +1,12 @@
 import { BrowserRouter as Nox , Routes , Route, Outlet } from "react-router-dom"
 import Home from "./Pages/Home"
+import Notifications from "./Pages/HomePages/Notifications"
 function App() {
   function Componant(){
     return(
       <>
         <Outlet />
+        <Notifications />
       </>
     )
   }
