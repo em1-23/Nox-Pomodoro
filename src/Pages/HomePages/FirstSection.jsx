@@ -295,7 +295,7 @@ export default function FirstSection() {
             </button>
           ))}
         </div>
-        <div className="Timer" style={{background: `conic-gradient(var(--SpecialColor) ${percentage}%, #fafafa ${percentage}%)`}} >
+        <div className="Timer" style={{ background: `conic-gradient(var(--SpecialColor) ${percentage}%, #fafafa ${percentage}%)` }} >
           <div className="Content">
             {timer}
           </div>
