@@ -295,14 +295,7 @@ export default function FirstSection() {
             </button>
           ))}
         </div>
-        
-        {/* عنصر التايمر مع تطبيق الـ conic-gradient في الـ background بناءً على النسبة */}
-        <div 
-          className="Timer"
-          style={{
-            background: `conic-gradient(var(--SpecialColor) ${percentage}%, #fafafa ${percentage}%)`
-          }}
-        >
+        <div className="Timer" style={{background: `conic-gradient(var(--SpecialColor) ${percentage}%, #fafafa ${percentage}%)`}} >
           <div className="Content">
             {timer}
           </div>
@@ -310,21 +303,11 @@ export default function FirstSection() {
 
         {storageError && <p role="alert">{storageError}</p>}
         <div className="Start">
-          <button
-            className="StartButton Button"
-            disabled={remainingSeconds === 0}
-            onClick={toggleTimer}
-            type="button"
-          >
+          <button className="StartButton Button" disabled={remainingSeconds === 0} onClick={toggleTimer} type="button">
             <i className={`fa-solid ${isRunning ? "fa-pause" : "fa-play"}`}></i>
             {isRunning ? " Pause" : remainingSeconds === 0 ? " Completed" : " Play"}
           </button>
-          <button
-            aria-label="Restart timer"
-            className="RestartButton Button"
-            onClick={restartSession}
-            type="button"
-          >
+          <button aria-label="Restart timer" className="RestartButton Button" onClick={restartSession} type="button">
             <i className="fa-solid fa-rotate-right"></i>
           </button>
         </div>
@@ -335,22 +318,13 @@ export default function FirstSection() {
           {Object.entries(sessions).map(([key, { label }]) => (
             <label key={key}>
               <br />
-              {label} duration (minutes)
-              <input
-                aria-label={`${label} duration in minutes`}
-                min="1"
-                onBlur={() => restoreDurationInput(key)}
-                onChange={(event) => changeDuration(key, event)}
-                step="1"
-                type="number"
-                value={durationInputs[key]}
-                className="inputTimer"
-              />
+              {label} duration (minutes) <br />
+              <input aria-label={`${label} duration in minutes`} min="1" onBlur={() => restoreDurationInput(key)} onChange={(event) => changeDuration(key, event)} step="1" type="number" value={durationInputs[key]} className="inputTimer" />
               <br />
             </label>
-          ))}
+          ))} <br />
           <label>
-            Work sessions before long break
+            Work sessions before long break <br />
             <input
               aria-label="Work sessions before long break"
               min="1"
