@@ -17,10 +17,6 @@ function Header() {
       >
         <i className="fa-solid fa-gear"></i>
       </button>
-      <div className="Sessions">
-        <div className="Ciricle"></div>
-        Sesstions Today : {localStorage.SessionsCount}
-      </div>      
     </div>
   )
 }

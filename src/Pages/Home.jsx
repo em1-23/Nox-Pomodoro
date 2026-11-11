@@ -1,4 +1,5 @@
 import FirstSection from "./HomePages/FirstSection"
+import Footer from "./HomePages/Footer"
 import Header from "./HomePages/Header"
 import ListSection from "./HomePages/ListSection"
 
@@ -8,6 +9,7 @@ function Home() {
       <Header />
       <FirstSection />
       <ListSection />
+      <Footer />
     </>
   )
 }

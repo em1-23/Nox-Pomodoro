@@ -423,6 +423,11 @@ html{
     flex-direction: column;
     gap: 5px;
   }
+  .DialogSetting{
+    width: 90%;
+    height: 90vh;
+    left: 0%;
+  }
 }
 @media (max-width : 600px) {
   html{
@@ -473,6 +478,79 @@ html{
         width: 250px;
         height: 250px;
         font-size: 25px;
+      }
+    }
+  }
+}
+.Section.Footer{
+  width: 85%;
+  background-color: var(--MainColor);
+  color: var(--BackgroundColor);
+  margin: -1% auto;
+  margin-top: 3%;
+  height: auto;
+  padding: 1% 5%;
+  border-radius: 2rem 2rem 0rem 0rem;
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr 300px 150px;
+  align-items: center;
+  h1{
+    font-family: "Head";
+    color: var(--SpecialColor);
+    font-size: 45px;
+  }
+  & .Social{
+    display: flex;
+    align-items: center;
+    gap: 7.5px;
+    & a{
+      & .fa-brands{
+        color: var(--Color);
+        font-size: 22.5px;
+      }
+    }
+  }
+}
+@media (max-width: 900px) {
+  .Section.Footer{
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: 1fr 50px;
+    h1{
+      font-size: 30px;
+    }
+    & .Social a .fa-brands{
+      font-size: 17.5px;
+    }
+  }
+}
+
+@media (max-width: 670px) {
+  .Section.Footer{
+    font-size: 12.5px;
+    h1{
+      font-size: 25px;
+    }
+    & .Social a .fa-brands{
+      font-size: 17.5px;
+    }
+  }
+}
+
+@media (max-width: 500px) {
+  .Section.Footer{
+    font-size: 12.5px;
+    grid-template-columns: 1fr;
+    text-align: center;
+    grid-template-rows: auto auto auto;
+    h1{
+      font-size: 25px;
+    }
+    & .Social {
+      justify-content: center;
+      width: 100%;
+      a .fa-brands{
+        font-size: 17.5px;
       }
     }
   }
