@@ -1,8 +1,50 @@
-# React + Vite
+# Nox Pomodoro
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+تطبيق لإدارة جلسات التركيز والاستراحات بطريقة Pomodoro، مع قائمة مهام تحفظ بياناتها محليًا في المتصفح.
 
-Currently, two official plugins are available:
+## المميزات
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- مؤقّت لجلسات العمل والاستراحة القصيرة والطويلة.
+- انتقال تلقائي بين جلسات العمل والاستراحات عند انتهاء المؤقّت.
+- إعداد مدد الجلسات وعدد جلسات العمل قبل الاستراحة الطويلة من زر الترس.
+- حفظ إعدادات المؤقّت وحالته في `localStorage`، واستعادة العدّ التنازلي بعد إعادة تحميل الصفحة.
+- إضافة المهام وتغيير حالتها إلى `Work At` أو `Done` أو `Not Yet`، مع إمكانية تصفيتها وحذفها.
+- حفظ قائمة المهام في `localStorage` تحت المفتاح `Items` وعرض عددها.
+
+## المتطلبات
+
+- Node.js و npm.
+
+## التشغيل محليًا
+
+```bash
+npm install
+npm run dev
+```
+
+افتح عنوان التطوير الذي يعرضه Vite في الطرفية.
+
+## أوامر المشروع
+
+| الأمر | الاستخدام |
+| --- | --- |
+| `npm run dev` | تشغيل خادم التطوير |
+| `npm run build` | إنشاء نسخة الإنتاج داخل `dist/` |
+| `npm run preview` | معاينة نسخة الإنتاج محليًا |
+| `npm run lint` | فحص ملفات المشروع باستخدام ESLint |
+
+## التخزين المحلي
+
+يخزن التطبيق البيانات على نفس المتصفح والجهاز باستخدام `localStorage`:
+
+- `npomodoro.timer`: جلسة المؤقّت الحالية، الوقت المتبقي، مدد الجلسات، وإعداد عدد جلسات العمل قبل الاستراحة الطويلة.
+- `Items`: قائمة المهام وحالة كل مهمة.
+
+هذه البيانات لا تتم مزامنتها بين الأجهزة أو المتصفحات، وقد تُحذف عند مسح بيانات الموقع من المتصفح.
+
+## التقنيات
+
+- React
+- Vite
+- React Router
+- CSS

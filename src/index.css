@@ -410,3 +410,70 @@ html{
     }
   }
 }
+@media (max-width : 1000px) {
+  .Section.ListSection{
+    .ContentEmpaty{
+      width: 95%;
+    }
+  }
+}
+@media (max-width : 900px) {
+  .FirstSection{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+@media (max-width : 600px) {
+  html{
+    font-size: 15px;
+  }
+  .Section.ListSection{
+    .Head{
+      .Name{
+        font-size: 15px;
+      }
+    }
+    .AddItemsAndLinks{
+      .Links{
+        font-size: 10px;
+      }
+    }
+    .ContentEmpaty{
+      font-size: 15px;
+      height: 300px;
+    }
+  }
+}
+@media (max-width : 500px) {
+  html{
+    font-size: 12.5px;
+  }
+  .Header{
+    flex-direction: column;
+    gap: 5px;
+  }
+  .FirstSection , .Section.ListSection{
+    width: 90%;
+    padding: 2% 5%;
+  }
+  .Section.ListSection{
+    .Head{
+      .Name{
+        font-size: 12.5px;
+      }
+    }
+    .ContentEmpaty{
+      height: 250px;
+    }
+  }
+  .FirstSection{
+    .RightSlider {
+      .Timer{
+        width: 250px;
+        height: 250px;
+        font-size: 25px;
+      }
+    }
+  }
+}
