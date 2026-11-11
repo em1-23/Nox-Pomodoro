@@ -493,12 +493,17 @@ html{
   border-radius: 2rem 2rem 0rem 0rem;
   display: grid;
   grid-template-rows: 1fr;
-  grid-template-columns: 1fr 300px 150px;
+  grid-template-columns: 1fr 300px 225px;
   align-items: center;
   h1{
     font-family: "Head";
     color: var(--SpecialColor);
     font-size: 45px;
+  }
+  & .Resourse{
+    a {
+      color: var(--SpecialColor);
+    }
   }
   & .Social{
     display: flex;

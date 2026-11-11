@@ -19,7 +19,12 @@ function Footer() {
         </div>
         My Portofilio is <a style={{color:"var(--SpecialColor)"}} href="https://the-n-ox.vercel.app/">the-n-ox.vercel.app/</a>
       </div>
-      <span style={{fontFamily:"Head"}}>By NOX</span>
+      <div className="Resourse">
+        Resoures : <br />
+        Fonts : <a href="https://www.dafont.com/" target="_blank">dafont.com/</a><br />
+        Icons : <a href="https://fontawesome.com/" target="_blank">fontawesome.com/</a><br />
+        Color : <a href="https://brandcolors.net/" target="_blank">brandcolors.net/</a><br />
+      </div>
     </div>
   )
 }
