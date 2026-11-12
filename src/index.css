@@ -533,11 +533,169 @@ html {
   }
 }
 
+.Section.SourceSection {
+  width: 80%;
+  margin: 3% auto;
+  padding: 2.5%;
+  border: 1px solid #e0e0e0;
+  border-radius: 2rem;
+  color: var(--MainColor);
+
+  .SourceHeader {
+    margin-bottom: 20px;
+    text-align: center;
+
+    h2 {
+      margin: 0;
+      color: var(--SpecialColor);
+    }
+
+    p {
+      margin: 8px 0 0;
+    }
+  }
+
+  .SourceTaskPicker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 auto 20px;
+
+    select {
+      max-width: min(60%, 400px);
+      padding: 8px;
+      border: 1px solid var(--SpecialColor);
+      border-radius: 6px;
+      background-color: var(--BackgroundColor);
+      color: var(--MainColor);
+      font: inherit;
+    }
+  }
+
+  .SourceEmpty,
+  .SourceError {
+    text-align: center;
+  }
+
+  .SourceError {
+    color: #de270f;
+  }
+
+  .SourceGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .SourceCard {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: var(--BackgroundColor);
+
+    h3 {
+      margin: 0 0 12px;
+      color: var(--SpecialColor);
+    }
+
+    input,
+    textarea {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--SpecialColor);
+      border-radius: 6px;
+      background-color: var(--BackgroundColor);
+      color: var(--MainColor);
+      font: inherit;
+    }
+
+    textarea {
+      display: block;
+      margin-top: 8px;
+      resize: vertical;
+    }
+
+    .SourceInputRow {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+
+      input {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .Button {
+        min-width: 64px;
+        padding: 0 12px;
+      }
+    }
+
+    .SourceVideoFrame {
+      position: relative;
+      width: 100%;
+      margin-top: 14px;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      border-radius: 8px;
+
+      iframe {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+    }
+
+    .SourceNotesLabel,
+    .SourceFileLabel {
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+
+    .SourceFileLabel {
+      margin-right: 10px;
+    }
+
+    .SourcePdfHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 12px 0;
+      overflow-wrap: anywhere;
+
+      .Button {
+        flex: 0 0 auto;
+        padding: 0 10px;
+      }
+    }
+
+    .SourcePdfFrame {
+      width: 100%;
+      height: min(75vh, 800px);
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+    }
+  }
+
+  .SourcePdfCard {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width : 1000px) {
   .Section.ListSection {
     .ContentEmpaty {
       width: 95%;
     }
+  }
+
+  .Section.SourceSection {
+    width: 90%;
   }
 }
 
@@ -553,6 +711,14 @@ html {
     height: 90vh;
     left: 0%;
   }
+
+  .Section.SourceSection .SourceGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .Section.SourceSection .SourcePdfCard {
+    grid-column: auto;
+  }
 }
 
 @media (max-width : 600px) {
@@ -564,6 +730,25 @@ html {
     .Head {
       .Name {
         font-size: 15px;
+      }
+
+      .Section.SourceSection {
+        width: 94%;
+        padding: 5%;
+        border-radius: 1.25rem;
+
+        .SourceTaskPicker {
+          align-items: stretch;
+          flex-direction: column;
+
+          select {
+            max-width: 100%;
+          }
+        }
+
+        .SourcePdfFrame {
+          height: 65vh;
+        }
       }
     }
 

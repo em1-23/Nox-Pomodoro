@@ -62,6 +62,10 @@ function ListSection() {
   const [workDurationMinutes, setWorkDurationMinutes] = useState(loadWorkDurationMinutes)
 
   useEffect(() => {
+    window.dispatchEvent(new CustomEvent("pomodoro:items-changed", {
+      detail: { items },
+    }))
+
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(items))
       setStorageError(null)
