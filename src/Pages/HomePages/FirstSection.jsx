@@ -15,6 +15,79 @@ function getDefaultDurations(workDurationMinutes) {
   }
 }
 
+function calculateDuration(expression) {
+  const compactExpression = expression.replace(/\s+/g, "")
+  const tokens = compactExpression.match(/\d+(?:\.\d*)?|\.\d+|[()+*/-]/g)
+  if (!tokens || tokens.join("") !== compactExpression) return null
+
+  let position = 0
+
+  function parsePrimary() {
+    const token = tokens[position]
+    if (token === "(") {
+      position += 1
+      const value = parseSum()
+      if (tokens[position] !== ")") throw new Error("Missing closing parenthesis.")
+      position += 1
+      return value
+    }
+
+    if (!token || !/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(token)) {
+      throw new Error("Expected a number.")
+    }
+    position += 1
+    return Number(token)
+  }
+
+  function parseUnary() {
+    if (tokens[position] === "+") {
+      position += 1
+      return parseUnary()
+    }
+    if (tokens[position] === "-") {
+      position += 1
+      return -parseUnary()
+    }
+    return parsePrimary()
+  }
+
+  function parseProduct() {
+    let value = parseUnary()
+    while (tokens[position] === "*" || tokens[position] === "/") {
+      const operator = tokens[position]
+      position += 1
+      const right = parseUnary()
+      if (operator === "/" && right === 0) throw new Error("Cannot divide by zero.")
+      value = operator === "*" ? value * right : value / right
+    }
+    return value
+  }
+
+  function parseSum() {
+    let value = parseProduct()
+    while (tokens[position] === "+" || tokens[position] === "-") {
+      const operator = tokens[position]
+      position += 1
+      const right = parseProduct()
+      value = operator === "+" ? value + right : value - right
+    }
+    return value
+  }
+
+  try {
+    const result = parseSum()
+    if (position !== tokens.length || !Number.isFinite(result) || result <= 0) return null
+
+    const roundedMinutes = Math.ceil(result)
+    return Number.isSafeInteger(roundedMinutes)
+      && roundedMinutes <= Math.floor(Number.MAX_SAFE_INTEGER / 60)
+      ? roundedMinutes
+      : null
+  } catch {
+    return null
+  }
+}
+
 function loadTimer() {
   const defaultDurations = getDefaultDurations(25)
   const defaultTimer = {
@@ -123,6 +196,11 @@ export default function FirstSection() {
   const storageErrorLogged = useRef(Boolean(initialTimer.error))
 
   useEffect(() => {
+    document.documentElement.classList.toggle("timer-running", isRunning)
+    return () => document.documentElement.classList.remove("timer-running")
+  }, [isRunning])
+
+  useEffect(() => {
     try {
       window.localStorage.setItem(storageKey, JSON.stringify({
         session,
@@ -154,6 +232,12 @@ export default function FirstSection() {
   ])
 
   useEffect(() => {
+    window.dispatchEvent(new CustomEvent("pomodoro:timer-settings-changed", {
+      detail: { workDurationMinutes: durations.work },
+    }))
+  }, [durations.work])
+
+  useEffect(() => {
     if (!isRunning) return undefined
 
     const interval = window.setInterval(() => {
@@ -161,6 +245,7 @@ export default function FirstSection() {
 
       if (secondsLeft === 0) {
         if (session === "work") {
+          window.dispatchEvent(new CustomEvent("pomodoro:work-session-completed"))
           const nextCompletedCount = completedWorkSessions + 1
           const nextSession = nextCompletedCount >= workSessionsBeforeLongBreak
             ? "longbreak"
@@ -226,11 +311,8 @@ export default function FirstSection() {
     const value = event.target.value
     setDurationInputs((inputs) => ({ ...inputs, [sessionName]: value }))
 
-    if (value === "" || !/^\d+$/.test(value)) return
-
-    const minutes = Number(value)
-    if (!Number.isSafeInteger(minutes) || minutes < 1
-      || minutes > Math.floor(Number.MAX_SAFE_INTEGER / 60)) return
+    const minutes = calculateDuration(value)
+    if (minutes === null) return
 
     const updatedSeconds = minutes * 60
     setDurations((current) => ({ ...current, [sessionName]: minutes }))
@@ -295,7 +377,7 @@ export default function FirstSection() {
             </button>
           ))}
         </div>
-        <div className="Timer" style={{ background: `conic-gradient(var(--SpecialColor) ${percentage}%, #fafafa ${percentage}%)` }} >
+        <div className="Timer" style={{ background: `conic-gradient(var(--SpecialColor) ${percentage}%, var(--BackgroundColor) ${percentage}%)` }} >
           <div className="Content">
             {timer}
           </div>
@@ -319,7 +401,16 @@ export default function FirstSection() {
             <label key={key}>
               <br />
               {label} duration (minutes) <br />
-              <input aria-label={`${label} duration in minutes`} min="1" onBlur={() => restoreDurationInput(key)} onChange={(event) => changeDuration(key, event)} step="1" type="number" value={durationInputs[key]} className="inputTimer" />
+              <input
+                aria-label={`${label} duration in minutes`}
+                inputMode="decimal"
+                onBlur={() => restoreDurationInput(key)}
+                onChange={(event) => changeDuration(key, event)}
+                placeholder="e.g. 45 * 0.33"
+                type="text"
+                value={durationInputs[key]}
+                className="inputTimer"
+              />
               <br />
             </label>
           ))} <br />
