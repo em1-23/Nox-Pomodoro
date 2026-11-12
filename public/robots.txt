@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nox-pomodoro.melngar650.workers.dev/sitemap.xml
