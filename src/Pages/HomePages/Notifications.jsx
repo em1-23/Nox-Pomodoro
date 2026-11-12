@@ -8,7 +8,6 @@ function Notifications() {
         <div className="Content">
           {N.Content}
         </div>
-        <i class="fa-solid fa-square-xmark"></i>
       </div>
     )
   }
