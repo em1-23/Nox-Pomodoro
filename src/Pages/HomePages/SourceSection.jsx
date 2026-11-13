@@ -276,11 +276,11 @@ function SourceSection() {
     event.target.value = ""
 
     if (!selectedTaskId) {
-      setStorageError("أضف مهمة أولًا لربط ملف PDF بها.")
+      setStorageError("Add Task To Connect The PDF With It")
       return
     }
     if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-      setStorageError("اختار ملف PDF فقط.")
+      setStorageError("Only Pdf")
       return
     }
 
@@ -295,7 +295,7 @@ function SourceSection() {
       await savePdf(taskId, { name: file.name, blob: file })
     } catch (error) {
       console.error("Could not save the task PDF locally.", error)
-      setStorageError("الملف مفتوح للمعاينة، لكن تعذر حفظه محليًا على هذا الجهاز.")
+      setStorageError("File Is Open For View And can't Save It In The Storage")
     }
   }
 
@@ -313,7 +313,7 @@ function SourceSection() {
       }
     } catch (error) {
       console.error("Could not delete the task PDF locally.", error)
-      setStorageError("تعذر حذف ملف PDF المحفوظ.")
+      setStorageError("Can't Delete The Saved Pdf")
     }
   }
 
@@ -324,13 +324,13 @@ function SourceSection() {
     <section aria-labelledby="source-title" className="Section SourceSection">
       <div className="SourceHeader">
         <h2 id="source-title">Source</h2>
-        <p>اربط فيديو أو ملاحظات أو PDF بمهمة. الملاحظات والملفات محفوظة على جهازك فقط.</p>
-        <p>فيديو YouTube يُعرض داخل الصفحة، ويحتاج اتصالًا بالإنترنت للتشغيل.</p>
+        <p>Connect A Video , Pdf , Notes With A Task Every Thing Ofline</p>
+        <p>Youtube Video Play In The Page And Need A Internet</p>
       </div>
 
       {tasks.length > 0 ? (
         <label className="SourceTaskPicker">
-          المهمة المرتبطة بالمصدر
+          Connect Task With The Source
           <select
             aria-label="Task linked to source"
             onChange={(event) => setSelectedTaskId(event.target.value)}
@@ -342,7 +342,7 @@ function SourceSection() {
           </select>
         </label>
       ) : (
-        <p className="SourceEmpty">أضف مهمة من قائمة المهام لربط مصدر بها.</p>
+        <p className="SourceEmpty">Add A Task To Connect It</p>
       )}
 
       {storageError && <p className="SourceError" role="alert">{storageError}</p>}
@@ -351,7 +351,7 @@ function SourceSection() {
         <section className="SourceCard">
           <h3>YouTube</h3>
           <form className="SourceVideoForm" onSubmit={showVideo}>
-            <label htmlFor="source-youtube-link">رابط الفيديو</label>
+            <label htmlFor="source-youtube-link">Video Link</label>
             <div className="SourceInputRow">
               <input
                 autoComplete="url"
@@ -362,7 +362,7 @@ function SourceSection() {
                 type="url"
                 value={videoLink}
               />
-              <button className="Button" disabled={!selectedTask} type="submit">عرض</button>
+              <button className="Button" disabled={!selectedTask} type="submit">View</button>
             </div>
           </form>
           {videoError && <p className="SourceError" role="alert">{videoError}</p>}
@@ -383,13 +383,13 @@ function SourceSection() {
         <section className="SourceCard">
           <h3>Notes</h3>
           <label className="SourceNotesLabel" htmlFor="source-notes">
-            ملاحظات المهمة (تُحفظ تلقائيًا في هذا المتصفح)
+            Notes (Saved Local)
           </label>
           <textarea
             disabled={!selectedTask}
             id="source-notes"
             onChange={(event) => updateSelectedSource({ notes: event.target.value })}
-            placeholder="اكتب ملاحظاتك هنا..."
+            placeholder="Notes Here .."
             rows="10"
             value={selectedSource.notes ?? ""}
           />
@@ -398,7 +398,7 @@ function SourceSection() {
         <section className="SourceCard SourcePdfCard">
           <h3>PDF</h3>
           <label className="SourceFileLabel" htmlFor="source-pdf">
-            اختار ملف PDF من جهازك
+            Choose A Pdf File Form Your Devise
           </label>
           <input
             accept="application/pdf,.pdf"
