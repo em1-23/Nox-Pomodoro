@@ -88,16 +88,26 @@ function ListSection() {
   }, [])
 
   useEffect(() => {
-    function handleWorkSessionCompleted() {
+    function handleWorkSessionCompleted(event) {
       const nextTask = items.find((item) => item.sessionsCompleted < item.sessionsRequired)
+      const completedAt = new Date().toISOString()
+
+      window.dispatchEvent(new CustomEvent("pomodoro:work-session-recorded", {
+        detail: {
+          durationMinutes: event.detail?.durationMinutes,
+          completedAt,
+          taskId: nextTask?.id ?? null,
+          taskName: nextTask?.content ?? null,
+        },
+      }))
 
       if (!nextTask) {
         window.dispatchEvent(new CustomEvent("pomodoro:notification", {
           detail: {
             style: "Success",
             content: items.length === 0
-              ? "اكتملت جلسة التركيز. أضف مهمة لبدء متابعة التقدم."
-              : "اكتملت جلسة التركيز، وجميع المهام مكتملة بالفعل.",
+              ? "Session Compleated Add Another Task "
+              : "Focus Taks Endend With all takses",
           },
         }))
         return
@@ -112,8 +122,8 @@ function ListSection() {
         detail: {
           style: "Success",
           content: taskCompleted
-            ? `اكتملت المهمة "${nextTask.content}".`
-            : `اكتملت جلسة للمهمة "${nextTask.content}" (${completedSessions}/${nextTask.sessionsRequired}).`,
+            ? `Task ended ${nextTask.content}.`
+            : `Task Compleated ${nextTask.content} (${completedSessions}/${nextTask.sessionsRequired}).`,
         },
       }))
     }

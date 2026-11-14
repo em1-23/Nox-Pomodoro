@@ -38,6 +38,7 @@ html {
   width: 97%;
   height: auto;
   padding: 1% 1.5%;
+  margin: auto auto;
 }
 
 .Header {
@@ -1075,5 +1076,395 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .Notification {
     animation-duration: 1ms;
+  }
+}
+
+.Section.ProgressSection {
+  box-sizing: border-box;
+  width: min(94%, 960px);
+  margin: 3% auto;
+  padding: clamp(16px, 3vw, 32px);
+  border: 1px solid #e0e0e0;
+  border-radius: clamp(14px, 3vw, 28px);
+  color: var(--MainColor);
+
+  .ProgressHeader {
+    margin-bottom: clamp(16px, 3vw, 28px);
+
+    h2 {
+      margin: 0;
+      color: var(--SpecialColor);
+      font-size: clamp(22px, 4vw, 30px);
+    }
+
+    p {
+      margin: 6px 0 0;
+      font-size: clamp(12px, 2vw, 15px);
+    }
+  }
+
+  .ProgressError {
+    color: #de270f;
+  }
+
+  .ProgressStats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(6px, 2vw, 16px);
+    margin-bottom: clamp(20px, 4vw, 36px);
+  }
+
+  .ProgressStat {
+    min-width: 0;
+    min-height: 84px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+    padding: clamp(8px, 2vw, 16px);
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+
+    span {
+      font-size: clamp(10px, 1.8vw, 14px);
+      overflow-wrap: anywhere;
+    }
+
+    strong {
+      color: var(--SpecialColor);
+      font-size: clamp(16px, 3vw, 24px);
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .ProgressTree {
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
+    padding: clamp(16px, 3vw, 28px);
+    border: 1px solid color-mix(in srgb, var(--SpecialColor) 24%, transparent);
+    border-radius: 18px;
+    background:
+      radial-gradient(ellipse at 18% 0, color-mix(in srgb, var(--SpecialColor) 13%, transparent), transparent 42%),
+      color-mix(in srgb, var(--MainColor) 3%, transparent);
+  }
+
+  .ProgressBrainNode {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: fit-content;
+    padding: 8px 16px 8px 8px;
+    border: 1px solid color-mix(in srgb, var(--SpecialColor) 48%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--SpecialColor) 10%, var(--BackgroundColor));
+    box-shadow: 0 0 24px color-mix(in srgb, var(--SpecialColor) 14%, transparent);
+
+    &::after {
+      position: absolute;
+      top: 100%;
+      left: 23px;
+      width: 1px;
+      height: 32px;
+      background: linear-gradient(var(--SpecialColor), color-mix(in srgb, var(--SpecialColor) 18%, transparent));
+      content: "";
+    }
+
+    > span:last-child {
+      display: grid;
+      gap: 2px;
+    }
+
+    strong {
+      color: var(--SpecialColor);
+      font-size: 13px;
+    }
+
+    small {
+      color: var(--MainColor);
+      font-size: 11px;
+      opacity: .7;
+    }
+  }
+
+  .ProgressBrainIcon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--SpecialColor);
+    background: color-mix(in srgb, var(--SpecialColor) 16%, transparent);
+    font-size: 20px;
+  }
+
+  .ProgressDayBranches {
+    position: relative;
+    margin: 30px 0 0 23px;
+    padding-left: 26px;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      bottom: 12px;
+      left: 0;
+      width: 1px;
+      background: linear-gradient(
+        color-mix(in srgb, var(--SpecialColor) 70%, transparent),
+        color-mix(in srgb, var(--MainColor) 18%, transparent)
+      );
+      content: "";
+    }
+  }
+
+  .ProgressDayBranch {
+    position: relative;
+    padding: 0 0 8px;
+
+    &::before {
+      position: absolute;
+      top: 19px;
+      left: -26px;
+      width: 26px;
+      height: 1px;
+      background: color-mix(in srgb, var(--SpecialColor) 48%, transparent);
+      content: "";
+      transition: background-color 180ms ease, box-shadow 180ms ease;
+    }
+  }
+
+  .ProgressDayTrigger {
+    position: relative;
+    width: 100%;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 10px 5px 0;
+    border: 0;
+    border-radius: 8px;
+    color: var(--MainColor);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 180ms ease;
+
+    > i {
+      margin-left: auto;
+      color: var(--SpecialColor);
+      font-size: 11px;
+      opacity: .75;
+    }
+
+    &:hover,
+    &:focus-visible {
+      outline: none;
+      background: color-mix(in srgb, var(--SpecialColor) 8%, transparent);
+    }
+  }
+
+  .ProgressBranchDot,
+  .ProgressSessionDot {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    border: 2px solid var(--SpecialColor);
+    border-radius: 50%;
+    background: var(--BackgroundColor);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--SpecialColor) 38%, transparent);
+  }
+
+  .ProgressBranchDot {
+    left: -31px;
+  }
+
+  .ProgressDayCopy {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+
+    strong {
+      font-size: 13px;
+    }
+
+    strong span {
+      margin-left: 5px;
+      color: var(--SpecialColor);
+      font-weight: 500;
+    }
+
+    small {
+      font-size: 11px;
+      opacity: .7;
+    }
+  }
+
+  .ProgressDayBranch.is-expanded::before {
+    background: var(--SpecialColor);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--SpecialColor) 65%, transparent);
+  }
+
+  .ProgressDayBranch.is-expanded > .ProgressDayTrigger .ProgressBranchDot {
+    background: var(--SpecialColor);
+  }
+
+  .ProgressSessionBranches {
+    position: relative;
+    display: grid;
+    gap: 7px;
+    margin: 5px 0 8px 18px;
+    padding: 5px 0 5px 22px;
+    border-left: 1px solid color-mix(in srgb, var(--SpecialColor) 38%, transparent);
+    animation: progress-branches-in 180ms ease both;
+  }
+
+  .ProgressSessionNode {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+    padding: 7px 10px 7px 0;
+    border: 0;
+    border-radius: 8px;
+    color: var(--MainColor);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 160ms ease;
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: -23px;
+      width: 22px;
+      height: 1px;
+      background: color-mix(in srgb, var(--SpecialColor) 36%, transparent);
+      content: "";
+    }
+
+    &:hover,
+    &:focus-visible,
+    &.is-active {
+      outline: none;
+      background: color-mix(in srgb, var(--SpecialColor) 8%, transparent);
+    }
+
+    &.is-active .ProgressSessionDot {
+      background: var(--SpecialColor);
+      box-shadow: 0 0 12px color-mix(in srgb, var(--SpecialColor) 75%, transparent);
+    }
+  }
+
+  .ProgressSessionDot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    justify-self: center;
+  }
+
+  .ProgressSessionSummary {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+
+    strong,
+    small {
+      overflow-wrap: anywhere;
+    }
+
+    strong {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    small {
+      font-size: 10px;
+      opacity: .68;
+    }
+  }
+
+  .ProgressSessionDetails {
+    grid-column: 2;
+    display: grid;
+    gap: 4px;
+    margin: 3px 4px 3px 0;
+    padding: 9px 11px;
+    border-left: 2px solid var(--SpecialColor);
+    border-radius: 0 8px 8px 0;
+    color: var(--MainColor);
+    background: color-mix(in srgb, var(--SpecialColor) 9%, transparent);
+    font-size: 11px;
+    animation: progress-branches-in 140ms ease both;
+
+    strong {
+      color: var(--SpecialColor);
+      overflow-wrap: anywhere;
+    }
+
+    time {
+      opacity: .72;
+    }
+  }
+
+  .ProgressEmpty,
+  .ProgressUntracked {
+    margin: 3px 0;
+    color: var(--MainColor);
+    font-size: 11px;
+    opacity: .7;
+  }
+
+  .ProgressStorageNote {
+    margin: 12px 0 0;
+    color: grey;
+    font-size: clamp(11px, 1.8vw, 13px);
+  }
+
+  @keyframes progress-branches-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ProgressSessionBranches,
+    .ProgressSessionDetails {
+      animation-duration: 1ms;
+    }
+  }
+}
+
+@media (max-width: 500px) {
+  .Section.ProgressSection {
+    width: 94%;
+    padding: 14px 10px;
+
+    .ProgressStats {
+      gap: 5px;
+    }
+
+    .ProgressStat {
+      min-height: 76px;
+      padding: 7px 5px;
+      border-radius: 7px;
+    }
+
+    .ProgressTree {
+      padding: 14px 10px;
+    }
   }
 }

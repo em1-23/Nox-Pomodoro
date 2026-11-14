@@ -245,7 +245,9 @@ export default function FirstSection() {
 
       if (secondsLeft === 0) {
         if (session === "work") {
-          window.dispatchEvent(new CustomEvent("pomodoro:work-session-completed"))
+          window.dispatchEvent(new CustomEvent("pomodoro:work-session-completed", {
+            detail: { durationMinutes: durations.work },
+          }))
           const nextCompletedCount = completedWorkSessions + 1
           const nextSession = nextCompletedCount >= workSessionsBeforeLongBreak
             ? "longbreak"
