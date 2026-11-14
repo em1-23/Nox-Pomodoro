@@ -696,6 +696,76 @@ html {
   }
 }
 
+.Section.SeoContent {
+  width: min(80%, 1100px);
+  margin: 3% auto;
+  padding: clamp(20px, 4vw, 48px);
+  box-sizing: border-box;
+  border: 1px solid #e0e0e0;
+  border-radius: 1.5rem;
+  color: var(--MainColor);
+
+  h2,
+  h3 {
+    color: var(--SpecialColor);
+  }
+
+  h2 {
+    margin-top: 0;
+    text-align: center;
+  }
+
+  > header > p {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .SeoFeatures {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 28px;
+
+    article {
+      padding: 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+    }
+
+    h3 {
+      margin-top: 0;
+    }
+  }
+
+  .SeoFaq {
+    margin-top: 30px;
+
+    article {
+      padding: 12px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    h4,
+    p {
+      margin: 6px 0;
+    }
+  }
+
+  .SeoArabic {
+    margin-top: 28px;
+    direction: rtl;
+
+    h3 {
+      text-align: right;
+    }
+
+    p {
+      line-height: 1.9;
+    }
+  }
+}
+
 @media (max-width : 1000px) {
   .Section.ListSection {
     .ContentEmpaty {
@@ -705,6 +775,14 @@ html {
 
   .Section.SourceSection {
     width: 90%;
+  }
+
+  .Section.SeoContent {
+    width: 90%;
+
+    .SeoFeatures {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 }
 
@@ -758,6 +836,11 @@ html {
         .SourcePdfFrame {
           height: 65vh;
         }
+      }
+
+      .Section.SeoContent {
+        width: 94%;
+        padding: 5%;
       }
     }
 
