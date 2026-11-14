@@ -1139,189 +1139,359 @@ html {
     }
   }
 
-  .ProgressTree {
+  .ProgressNetwork {
     position: relative;
+    isolation: isolate;
     overflow: hidden;
     box-sizing: border-box;
     width: 100%;
-    padding: clamp(16px, 3vw, 28px);
-    border: 1px solid color-mix(in srgb, var(--SpecialColor) 24%, transparent);
+    aspect-ratio: 760 / 530;
+    min-height: 430px;
+    border: 1px solid color-mix(in srgb, var(--SpecialColor) 25%, transparent);
     border-radius: 18px;
     background:
-      radial-gradient(ellipse at 18% 0, color-mix(in srgb, var(--SpecialColor) 13%, transparent), transparent 42%),
+      radial-gradient(ellipse at center, color-mix(in srgb, var(--SpecialColor) 7%, transparent), transparent 45%),
       color-mix(in srgb, var(--MainColor) 3%, transparent);
   }
 
-  .ProgressBrainNode {
-    position: relative;
-    z-index: 1;
+  .ProgressNetworkGrid {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    opacity: .24;
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--MainColor) 9%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--MainColor) 9%, transparent) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse, black 15%, transparent 85%);
+  }
+
+  .ProgressCircuit {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .ProgressWire,
+  .ProgressInnerWire {
+    fill: none;
+    stroke: color-mix(in srgb, var(--SpecialColor) 35%, transparent);
+    stroke-width: 1.2;
+    vector-effect: non-scaling-stroke;
+    transition: stroke 180ms ease, stroke-width 180ms ease, opacity 180ms ease;
+  }
+
+  .ProgressInnerWire {
+    stroke: color-mix(in srgb, var(--SpecialColor) 29%, transparent);
+    stroke-width: 1;
+  }
+
+  .ProgressMesh {
+    fill: none;
+    stroke: color-mix(in srgb, var(--SpecialColor) 27%, transparent);
+    stroke-width: .8;
+    vector-effect: non-scaling-stroke;
+
+    circle {
+      fill: var(--BackgroundColor);
+    }
+  }
+
+  .ProgressWireNode {
+    fill: var(--BackgroundColor);
+    stroke: color-mix(in srgb, var(--SpecialColor) 78%, transparent);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    transition: fill 180ms ease, stroke-width 180ms ease;
+  }
+
+  .ProgressNetwork.has-active .ProgressWireGroup:not(.is-active) {
+    opacity: .36;
+  }
+
+  .ProgressNetwork[data-active-day="0"] .ProgressNetworkDay--2,
+  .ProgressNetwork[data-active-day="2"] .ProgressNetworkDay--0,
+  .ProgressNetwork[data-active-day="4"] .ProgressNetworkDay--2 {
+    transform: translate(-3px, -2px);
+  }
+
+  .ProgressNetwork[data-active-day="1"] .ProgressNetworkDay--3,
+  .ProgressNetwork[data-active-day="3"] .ProgressNetworkDay--1,
+  .ProgressNetwork[data-active-day="5"] .ProgressNetworkDay--3 {
+    transform: translate(3px, -2px);
+  }
+
+  .ProgressNetwork[data-active-day="6"] .ProgressNetworkDay--4 {
+    transform: translate(-2px, -3px);
+  }
+
+  .ProgressWireGroup.is-active .ProgressWire {
+    stroke: var(--SpecialColor);
+    stroke-width: 2;
+  }
+
+  .ProgressWireGroup.is-active .ProgressWireNode {
+    fill: var(--SpecialColor);
+    stroke-width: 2.5;
+  }
+
+  .ProgressCore {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    width: clamp(176px, 31%, 225px);
+    aspect-ratio: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    width: fit-content;
-    padding: 8px 16px 8px 8px;
-    border: 1px solid color-mix(in srgb, var(--SpecialColor) 48%, transparent);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--SpecialColor) 10%, var(--BackgroundColor));
-    box-shadow: 0 0 24px color-mix(in srgb, var(--SpecialColor) 14%, transparent);
-
-    &::after {
-      position: absolute;
-      top: 100%;
-      left: 23px;
-      width: 1px;
-      height: 32px;
-      background: linear-gradient(var(--SpecialColor), color-mix(in srgb, var(--SpecialColor) 18%, transparent));
-      content: "";
-    }
-
-    > span:last-child {
-      display: grid;
-      gap: 2px;
-    }
-
-    strong {
-      color: var(--SpecialColor);
-      font-size: 13px;
-    }
-
-    small {
-      color: var(--MainColor);
-      font-size: 11px;
-      opacity: .7;
-    }
-  }
-
-  .ProgressBrainIcon {
-    width: 40px;
-    height: 40px;
-    display: grid;
-    place-items: center;
+    justify-content: center;
+    gap: 5px;
+    border: 1px solid color-mix(in srgb, var(--SpecialColor) 52%, transparent);
     border-radius: 50%;
+    color: var(--MainColor);
+    background: radial-gradient(circle, var(--BackgroundColor) 48%, color-mix(in srgb, var(--SpecialColor) 11%, var(--BackgroundColor)));
+    box-shadow:
+      0 0 0 7px color-mix(in srgb, var(--SpecialColor) 5%, transparent),
+      0 0 25px color-mix(in srgb, var(--SpecialColor) 14%, transparent),
+      inset 0 0 25px color-mix(in srgb, var(--SpecialColor) 8%, transparent);
+    transform: translate(-50%, -50%);
+  }
+
+  .ProgressBrainArt {
+    width: 52%;
+    max-height: 56%;
+    overflow: visible;
     color: var(--SpecialColor);
-    background: color-mix(in srgb, var(--SpecialColor) 16%, transparent);
-    font-size: 20px;
+    filter: drop-shadow(0 0 5px color-mix(in srgb, var(--SpecialColor) 35%, transparent));
   }
 
-  .ProgressDayBranches {
-    position: relative;
-    margin: 30px 0 0 23px;
-    padding-left: 26px;
-
-    &::before {
-      position: absolute;
-      top: 0;
-      bottom: 12px;
-      left: 0;
-      width: 1px;
-      background: linear-gradient(
-        color-mix(in srgb, var(--SpecialColor) 70%, transparent),
-        color-mix(in srgb, var(--MainColor) 18%, transparent)
-      );
-      content: "";
-    }
+  .ProgressBrainOutline,
+  .ProgressBrainSeam,
+  .ProgressBrainLinks {
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
-  .ProgressDayBranch {
-    position: relative;
-    padding: 0 0 8px;
+  .ProgressBrainOutline {
+    stroke-width: 2.2;
+  }
 
-    &::before {
-      position: absolute;
-      top: 19px;
-      left: -26px;
-      width: 26px;
-      height: 1px;
-      background: color-mix(in srgb, var(--SpecialColor) 48%, transparent);
-      content: "";
-      transition: background-color 180ms ease, box-shadow 180ms ease;
-    }
+  .ProgressBrainSeam {
+    stroke-width: 1.4;
+    opacity: .72;
+  }
+
+  .ProgressBrainLinks {
+    stroke-width: 1;
+    opacity: .65;
+  }
+
+  .ProgressBrainDots {
+    fill: currentColor;
+  }
+
+  .ProgressCore > strong {
+    color: var(--SpecialColor);
+    font-size: clamp(9px, 1.4vw, 12px);
+    letter-spacing: .14em;
+  }
+
+  .ProgressCore > span {
+    max-width: 85%;
+    font-size: clamp(9px, 1.2vw, 11px);
+    text-align: center;
+    opacity: .72;
+  }
+
+  .ProgressNetworkDays {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+  }
+
+  .ProgressNetworkDay {
+    position: absolute;
+    z-index: 1;
+    width: clamp(108px, 18%, 146px);
+    transition: transform 180ms ease;
+  }
+
+  .ProgressNetworkDay--0 {
+    top: 5%;
+    left: 5%;
+  }
+
+  .ProgressNetworkDay--1 {
+    top: 5%;
+    right: 5%;
+  }
+
+  .ProgressNetworkDay--2 {
+    top: calc(50% - 22px);
+    left: 1.5%;
+  }
+
+  .ProgressNetworkDay--3 {
+    top: calc(50% - 22px);
+    right: 1.5%;
+  }
+
+  .ProgressNetworkDay--4 {
+    bottom: 12%;
+    left: 5%;
+  }
+
+  .ProgressNetworkDay--5 {
+    right: 5%;
+    bottom: 12%;
+  }
+
+  .ProgressNetworkDay--6 {
+    bottom: 2%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .ProgressNetworkDay.is-expanded {
+    z-index: 5;
+    transform: translateY(-2px);
+  }
+
+  .ProgressNetworkDay--6.is-expanded {
+    transform: translate(-50%, -2px);
   }
 
   .ProgressDayTrigger {
     position: relative;
     width: 100%;
-    min-height: 40px;
+    min-height: 44px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 5px 10px 5px 0;
-    border: 0;
-    border-radius: 8px;
+    gap: 9px;
+    padding: 6px 9px;
+    border: 1px solid color-mix(in srgb, var(--SpecialColor) 32%, transparent);
+    border-radius: 10px;
     color: var(--MainColor);
-    background: transparent;
+    background: color-mix(in srgb, var(--BackgroundColor) 93%, transparent);
+    box-shadow: 0 3px 12px color-mix(in srgb, var(--MainColor) 8%, transparent);
     text-align: left;
     cursor: pointer;
-    transition: background-color 180ms ease;
-
-    > i {
-      margin-left: auto;
-      color: var(--SpecialColor);
-      font-size: 11px;
-      opacity: .75;
-    }
+    transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 
     &:hover,
-    &:focus-visible {
+    &:focus-visible,
+    &[aria-expanded="true"] {
       outline: none;
-      background: color-mix(in srgb, var(--SpecialColor) 8%, transparent);
+      border-color: var(--SpecialColor);
+      background: var(--BackgroundColor);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--SpecialColor) 11%, transparent);
     }
   }
 
   .ProgressBranchDot,
   .ProgressSessionDot {
-    position: absolute;
     width: 9px;
     height: 9px;
     flex: 0 0 9px;
     border: 2px solid var(--SpecialColor);
     border-radius: 50%;
     background: var(--BackgroundColor);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--SpecialColor) 38%, transparent);
+    box-shadow: 0 0 9px color-mix(in srgb, var(--SpecialColor) 36%, transparent);
+    transition: background-color 160ms ease, box-shadow 160ms ease;
   }
 
-  .ProgressBranchDot {
-    left: -31px;
+  .ProgressNetworkDay.is-expanded .ProgressBranchDot {
+    background: var(--SpecialColor);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--SpecialColor) 64%, transparent);
   }
 
   .ProgressDayCopy {
     min-width: 0;
     display: grid;
-    gap: 3px;
+    gap: 2px;
+
+    strong,
+    small {
+      overflow-wrap: anywhere;
+    }
 
     strong {
-      font-size: 13px;
+      font-size: 11px;
     }
 
     strong span {
-      margin-left: 5px;
+      margin-left: 3px;
       color: var(--SpecialColor);
       font-weight: 500;
     }
 
     small {
-      font-size: 11px;
+      font-size: 9px;
       opacity: .7;
     }
   }
 
-  .ProgressDayBranch.is-expanded::before {
-    background: var(--SpecialColor);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--SpecialColor) 65%, transparent);
-  }
-
-  .ProgressDayBranch.is-expanded > .ProgressDayTrigger .ProgressBranchDot {
-    background: var(--SpecialColor);
-  }
-
   .ProgressSessionBranches {
-    position: relative;
+    position: absolute;
+    z-index: 10;
+    top: calc(100% + 7px);
+    left: 0;
+    width: max(210px, 100%);
+    max-width: min(290px, 76vw);
+    max-height: 220px;
     display: grid;
-    gap: 7px;
-    margin: 5px 0 8px 18px;
-    padding: 5px 0 5px 22px;
-    border-left: 1px solid color-mix(in srgb, var(--SpecialColor) 38%, transparent);
-    animation: progress-branches-in 180ms ease both;
+    gap: 5px;
+    overflow: auto;
+    padding: 9px;
+    border: 1px solid color-mix(in srgb, var(--SpecialColor) 40%, transparent);
+    border-radius: 12px;
+    color: var(--MainColor);
+    background: var(--BackgroundColor);
+    box-shadow: 0 12px 30px color-mix(in srgb, var(--MainColor) 16%, transparent);
+    animation: progress-branches-in 150ms ease both;
+  }
+
+  .ProgressNetworkDay--1 .ProgressSessionBranches,
+  .ProgressNetworkDay--3 .ProgressSessionBranches,
+  .ProgressNetworkDay--5 .ProgressSessionBranches {
+    right: 0;
+    left: auto;
+  }
+
+  .ProgressNetworkDay--4 .ProgressSessionBranches,
+  .ProgressNetworkDay--5 .ProgressSessionBranches,
+  .ProgressNetworkDay--6 .ProgressSessionBranches {
+    top: auto;
+    bottom: calc(100% + 7px);
+  }
+
+  .ProgressNetworkDay--6 .ProgressSessionBranches {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .ProgressSessionHeader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 2px 3px 6px;
+    border-bottom: 1px solid color-mix(in srgb, var(--SpecialColor) 25%, transparent);
+    color: var(--SpecialColor);
+    font-size: 10px;
+
+    span {
+      color: var(--MainColor);
+      opacity: .65;
+    }
   }
 
   .ProgressSessionNode {
@@ -1331,50 +1501,32 @@ html {
     display: grid;
     grid-template-columns: 10px minmax(0, 1fr);
     align-items: center;
-    gap: 9px;
-    padding: 7px 10px 7px 0;
+    gap: 8px;
+    padding: 6px 7px;
     border: 0;
-    border-radius: 8px;
+    border-radius: 7px;
     color: var(--MainColor);
     background: transparent;
     text-align: left;
     cursor: pointer;
-    transition: background-color 160ms ease;
-
-    &::before {
-      position: absolute;
-      top: 50%;
-      left: -23px;
-      width: 22px;
-      height: 1px;
-      background: color-mix(in srgb, var(--SpecialColor) 36%, transparent);
-      content: "";
-    }
 
     &:hover,
     &:focus-visible,
     &.is-active {
       outline: none;
-      background: color-mix(in srgb, var(--SpecialColor) 8%, transparent);
+      background: color-mix(in srgb, var(--SpecialColor) 9%, transparent);
     }
 
     &.is-active .ProgressSessionDot {
       background: var(--SpecialColor);
-      box-shadow: 0 0 12px color-mix(in srgb, var(--SpecialColor) 75%, transparent);
+      box-shadow: 0 0 10px color-mix(in srgb, var(--SpecialColor) 70%, transparent);
     }
-  }
-
-  .ProgressSessionDot {
-    position: relative;
-    width: 8px;
-    height: 8px;
-    justify-self: center;
   }
 
   .ProgressSessionSummary {
     min-width: 0;
     display: grid;
-    gap: 3px;
+    gap: 2px;
 
     strong,
     small {
@@ -1382,12 +1534,11 @@ html {
     }
 
     strong {
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
     }
 
     small {
-      font-size: 10px;
+      font-size: 9px;
       opacity: .68;
     }
   }
@@ -1395,14 +1546,14 @@ html {
   .ProgressSessionDetails {
     grid-column: 2;
     display: grid;
-    gap: 4px;
-    margin: 3px 4px 3px 0;
-    padding: 9px 11px;
+    gap: 3px;
+    margin: 2px 0;
+    padding: 7px 9px;
     border-left: 2px solid var(--SpecialColor);
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 7px 7px 0;
     color: var(--MainColor);
     background: color-mix(in srgb, var(--SpecialColor) 9%, transparent);
-    font-size: 11px;
+    font-size: 10px;
     animation: progress-branches-in 140ms ease both;
 
     strong {
@@ -1419,7 +1570,7 @@ html {
   .ProgressUntracked {
     margin: 3px 0;
     color: var(--MainColor);
-    font-size: 11px;
+    font-size: 10px;
     opacity: .7;
   }
 
@@ -1463,8 +1614,56 @@ html {
       border-radius: 7px;
     }
 
-    .ProgressTree {
-      padding: 14px 10px;
+    .ProgressNetwork {
+      min-height: 460px;
+      aspect-ratio: auto;
+    }
+
+    .ProgressNetworkDay {
+      width: min(124px, calc(50% - 68px));
+    }
+
+    .ProgressNetworkDay--0 {
+      top: 4%;
+      left: 3%;
+    }
+
+    .ProgressNetworkDay--1 {
+      top: 4%;
+      right: 3%;
+    }
+
+    .ProgressNetworkDay--2 {
+      top: calc(50% - 22px);
+      left: 0;
+    }
+
+    .ProgressNetworkDay--3 {
+      top: calc(50% - 22px);
+      right: 0;
+    }
+
+    .ProgressNetworkDay--4 {
+      bottom: 12%;
+      left: 3%;
+    }
+
+    .ProgressNetworkDay--5 {
+      right: 3%;
+      bottom: 12%;
+    }
+
+    .ProgressNetworkDay--6 {
+      bottom: 2%;
+    }
+
+    .ProgressCore {
+      top: 50%;
+      width: 124px;
+    }
+
+    .ProgressSessionBranches {
+      max-width: min(250px, 75vw);
     }
   }
 }

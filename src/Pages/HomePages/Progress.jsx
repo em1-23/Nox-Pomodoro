@@ -3,12 +3,37 @@ import { useEffect, useState } from "react"
 const storageKey = "npomodoro.dailyProgress"
 const historyStorageKey = "npomodoro.sessionHistory"
 const historyDays = 7
+const networkWires = [
+  "M 355 205 C 286 146 202 86 110 46",
+  "M 445 205 C 514 146 598 86 690 46",
+  "M 310 250 C 236 250 156 250 80 250",
+  "M 490 250 C 564 250 644 250 720 250",
+  "M 355 295 C 286 336 202 392 110 420",
+  "M 445 295 C 514 336 598 392 690 420",
+  "M 400 325 C 400 374 400 426 400 470",
+]
+const networkNodes = [
+  [110, 46],
+  [690, 46],
+  [80, 250],
+  [720, 250],
+  [110, 420],
+  [690, 420],
+  [400, 470],
+]
 
 function getLocalDateKey(date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
   const day = String(date.getDate()).padStart(2, "0")
   return `${year}-${month}-${day}`
+}
+
+function getEarliestHistoryDate(date = new Date()) {
+  const earliestDate = new Date(date)
+  earliestDate.setHours(0, 0, 0, 0)
+  earliestDate.setDate(earliestDate.getDate() - (historyDays - 1))
+  return getLocalDateKey(earliestDate)
 }
 
 function getLastDays(today) {
@@ -52,6 +77,7 @@ function loadSessionHistory() {
       throw new Error("Saved session history must be an array.")
     }
 
+    const earliestDate = getEarliestHistoryDate()
     const sessions = stored.filter((session) =>
       session
       && typeof session.id === "string"
@@ -59,7 +85,8 @@ function loadSessionHistory() {
       && session.durationMinutes > 0
       && Number.isFinite(Date.parse(session.completedAt))
       && (session.taskId === null || typeof session.taskId === "string")
-      && (session.taskName === null || typeof session.taskName === "string"),
+      && (session.taskName === null || typeof session.taskName === "string")
+      && getLocalDateKey(new Date(session.completedAt)) >= earliestDate,
     )
     return { sessions, error: null }
   } catch (error) {
@@ -83,7 +110,8 @@ function Progress() {
   const [storageError, setStorageError] = useState(initialData.error)
   const [historyStorageError, setHistoryStorageError] = useState(initialHistory.error)
   const [today, setToday] = useState(() => getLocalDateKey(new Date()))
-  const [expandedDay, setExpandedDay] = useState(null)
+  const [hoveredDay, setHoveredDay] = useState(null)
+  const [pinnedDay, setPinnedDay] = useState(null)
   const [hoveredSessionId, setHoveredSessionId] = useState(null)
   const [pinnedSessionId, setPinnedSessionId] = useState(null)
 
@@ -136,15 +164,19 @@ function Progress() {
           },
         }
       })
+      const earliestDate = getEarliestHistoryDate(new Date(completedAt))
+      const recordedSession = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        durationMinutes,
+        completedAt,
+        taskId,
+        taskName,
+      }
       setSessionHistory((currentHistory) => [
-        ...currentHistory,
-        {
-          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          durationMinutes,
-          completedAt,
-          taskId,
-          taskName,
-        },
+        ...currentHistory.filter(
+          (session) => getLocalDateKey(new Date(session.completedAt)) >= earliestDate,
+        ),
+        recordedSession,
       ])
       setToday(date)
     }
@@ -157,14 +189,21 @@ function Progress() {
   const dayCounts = days.map((day) => dailyProgress[day.key]?.sessions ?? 0)
   const todayStats = dailyProgress[today] ?? { sessions: 0, focusMinutes: 0 }
   const weeklySessions = dayCounts.reduce((sum, count) => sum + count, 0)
+  const weeklyFocusMinutes = days.reduce(
+    (sum, day) => sum + (dailyProgress[day.key]?.focusMinutes ?? 0),
+    0,
+  )
   const todayHours = Math.floor(todayStats.focusMinutes / 60)
   const todayMinutes = todayStats.focusMinutes % 60
-  const sessionsByDay = new Map(days.map((day) => [
-    day.key,
-    sessionHistory
-      .filter((session) => getLocalDateKey(new Date(session.completedAt)) === day.key)
-      .sort((first, second) => Date.parse(second.completedAt) - Date.parse(first.completedAt)),
-  ]))
+  const activeDay = hoveredDay ?? pinnedDay
+  const sessionsByDay = new Map(days.map((day) => [day.key, []]))
+  sessionHistory.forEach((session) => {
+    const daySessions = sessionsByDay.get(getLocalDateKey(new Date(session.completedAt)))
+    if (daySessions) daySessions.push(session)
+  })
+  sessionsByDay.forEach((daySessions) => {
+    daySessions.sort((first, second) => Date.parse(second.completedAt) - Date.parse(first.completedAt))
+  })
 
   return (
     <section aria-labelledby="daily-progress-title" className="Section ProgressSection">
@@ -192,38 +231,94 @@ function Progress() {
         </article>
       </div>
 
-      <div aria-label={`Focus session network for the last ${historyDays} days`} className="ProgressTree">
-        <div className="ProgressBrainNode">
-          <span aria-hidden="true" className="ProgressBrainIcon">
-            <i className="fa-solid fa-brain"></i>
-          </span>
-          <span>
-            <strong>Focus Network</strong>
-            <small>Last 7 days</small>
-          </span>
+      <div
+        aria-label={`Focus session network for the last ${historyDays} days`}
+        className={`ProgressNetwork ${activeDay ? "has-active" : ""}`}
+        data-active-day={activeDay ? days.findIndex((day) => day.key === activeDay) : ""}
+        role="group"
+      >
+        <div aria-hidden="true" className="ProgressNetworkGrid" />
+        <svg aria-hidden="true" className="ProgressCircuit" preserveAspectRatio="none" viewBox="0 0 800 500">
+          {networkWires.map((wire, index) => {
+            const day = days[index]
+            return (
+              <g className={`ProgressWireGroup ${activeDay === day.key ? "is-active" : ""}`} key={day.key}>
+                <path className="ProgressWire" d={wire} />
+                <circle className="ProgressWireNode" cx={networkNodes[index][0]} cy={networkNodes[index][1]} r="4" />
+              </g>
+            )
+          })}
+          <g className="ProgressMesh">
+            <path d="M286 148 L246 118 L205 91 L164 68 M246 118 L272 91 M205 91 L183 116 M514 148 L554 118 L595 91 L636 68 M554 118 L528 91 M595 91 L617 116 M226 250 L181 224 L132 250 L181 276 Z M574 250 L619 224 L668 250 L619 276 Z M286 352 L246 382 L205 409 L164 432 M246 382 L272 409 M205 409 L183 384 M514 352 L554 382 L595 409 L636 432 M554 382 L528 409 M595 409 L617 384 M400 378 L400 426" />
+            <circle cx="286" cy="148" r="3" /><circle cx="246" cy="118" r="3" />
+            <circle cx="205" cy="91" r="3" /><circle cx="164" cy="68" r="3" />
+            <circle cx="272" cy="91" r="2.5" /><circle cx="183" cy="116" r="2.5" />
+            <circle cx="514" cy="148" r="3" /><circle cx="554" cy="118" r="3" />
+            <circle cx="595" cy="91" r="3" /><circle cx="636" cy="68" r="3" />
+            <circle cx="528" cy="91" r="2.5" /><circle cx="617" cy="116" r="2.5" />
+            <circle cx="226" cy="250" r="3" /><circle cx="181" cy="224" r="3" />
+            <circle cx="132" cy="250" r="3" /><circle cx="181" cy="276" r="3" />
+            <circle cx="574" cy="250" r="3" /><circle cx="619" cy="224" r="3" />
+            <circle cx="668" cy="250" r="3" /><circle cx="619" cy="276" r="3" />
+            <circle cx="286" cy="352" r="3" /><circle cx="246" cy="382" r="3" />
+            <circle cx="205" cy="409" r="3" /><circle cx="164" cy="432" r="3" />
+            <circle cx="272" cy="409" r="2.5" /><circle cx="183" cy="384" r="2.5" />
+            <circle cx="514" cy="352" r="3" /><circle cx="554" cy="382" r="3" />
+            <circle cx="595" cy="409" r="3" /><circle cx="636" cy="432" r="3" />
+            <circle cx="528" cy="409" r="2.5" /><circle cx="617" cy="384" r="2.5" />
+            <circle cx="400" cy="378" r="3" /><circle cx="400" cy="426" r="3" />
+          </g>
+          <path className="ProgressInnerWire" d="M400 210 L400 168 M370 222 L338 196 M430 222 L462 196 M368 270 L336 294 M432 270 L464 294 M400 282 L400 326" />
+        </svg>
+
+        <div className="ProgressCore">
+          <svg aria-hidden="true" className="ProgressBrainArt" viewBox="0 0 120 94">
+            <path className="ProgressBrainOutline" d="M60 13 C54 5 43 7 39 15 C29 10 18 18 19 29 C8 33 8 47 17 53 C10 62 15 74 25 76 C26 87 39 91 47 84 C52 91 57 89 60 85 C63 89 68 91 73 84 C81 91 94 87 95 76 C105 74 110 62 103 53 C112 47 112 33 101 29 C102 18 91 10 81 15 C77 7 66 5 60 13 Z" />
+            <path className="ProgressBrainSeam" d="M60 13 C58 29 62 38 59 50 C63 62 58 74 60 85" />
+            <path className="ProgressBrainLinks" d="M27 29 L43 35 L35 51 L50 59 L39 75 M43 35 L54 25 M35 51 L23 59 M50 59 L51 76 M93 29 L77 35 L85 51 L70 59 L81 75 M77 35 L66 25 M85 51 L97 59 M70 59 L69 76" />
+            <g className="ProgressBrainDots">
+              <circle cx="27" cy="29" r="2.5" /><circle cx="43" cy="35" r="2.5" />
+              <circle cx="35" cy="51" r="2.5" /><circle cx="50" cy="59" r="2.5" />
+              <circle cx="39" cy="75" r="2.5" /><circle cx="54" cy="25" r="2.5" />
+              <circle cx="23" cy="59" r="2.5" /><circle cx="51" cy="76" r="2.5" />
+              <circle cx="93" cy="29" r="2.5" /><circle cx="77" cy="35" r="2.5" />
+              <circle cx="85" cy="51" r="2.5" /><circle cx="70" cy="59" r="2.5" />
+              <circle cx="81" cy="75" r="2.5" /><circle cx="66" cy="25" r="2.5" />
+              <circle cx="97" cy="59" r="2.5" /><circle cx="69" cy="76" r="2.5" />
+            </g>
+          </svg>
+          <strong>FOCUS CORE</strong>
+          <span>{weeklySessions} sessions · {formatDuration(weeklyFocusMinutes)}</span>
         </div>
 
-        <div className="ProgressDayBranches">
-          {days.map((day) => {
+        <div className="ProgressNetworkDays">
+          {days.map((day, index) => {
             const sessions = sessionsByDay.get(day.key) ?? []
             const totalSessions = dailyProgress[day.key]?.sessions ?? 0
             const totalMinutes = dailyProgress[day.key]?.focusMinutes ?? 0
             const untrackedSessions = Math.max(0, totalSessions - sessions.length)
-            const isExpanded = expandedDay === day.key
+            const isExpanded = activeDay === day.key
             const dayId = `progress-sessions-${day.key}`
+            const positionClass = `ProgressNetworkDay--${index}`
 
             return (
               <article
-                className={`ProgressDayBranch ${isExpanded ? "is-expanded" : ""}`}
+                className={`ProgressNetworkDay ${positionClass} ${isExpanded ? "is-expanded" : ""}`}
                 key={day.key}
-                onMouseEnter={() => setExpandedDay(day.key)}
-                onMouseLeave={() => setExpandedDay((current) => current === day.key ? null : current)}
+                onMouseEnter={() => setHoveredDay(day.key)}
+                onMouseLeave={() => setHoveredDay(null)}
               >
                 <button
                   aria-controls={dayId}
                   aria-expanded={isExpanded}
                   className="ProgressDayTrigger"
-                  onClick={() => setExpandedDay((current) => current === day.key ? null : day.key)}
+                  onBlur={(event) => {
+                    if (!event.currentTarget.closest(".ProgressNetworkDay")?.contains(event.relatedTarget)) {
+                      setHoveredDay(null)
+                    }
+                  }}
+                  onClick={() => setPinnedDay((current) => current === day.key ? null : day.key)}
+                  onFocus={() => setHoveredDay(day.key)}
                   type="button"
                 >
                   <span aria-hidden="true" className="ProgressBranchDot" />
@@ -231,11 +326,14 @@ function Progress() {
                     <strong>{day.label} <span>{day.dateLabel}</span></strong>
                     <small>{totalSessions} sessions · {formatDuration(totalMinutes)}</small>
                   </span>
-                  <i aria-hidden="true" className={`fa-solid ${isExpanded ? "fa-chevron-up" : "fa-chevron-down"}`}></i>
                 </button>
 
                 {isExpanded && (
                   <div className="ProgressSessionBranches" id={dayId}>
+                    <div className="ProgressSessionHeader">
+                      <strong>{day.label} · {day.dateLabel}</strong>
+                      <span>{sessions.length} detailed {sessions.length === 1 ? "session" : "sessions"}</span>
+                    </div>
                     {sessions.map((session) => {
                       const isActive = hoveredSessionId === session.id || pinnedSessionId === session.id
                       const completedDate = new Date(session.completedAt)

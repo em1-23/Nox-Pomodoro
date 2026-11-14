@@ -112,7 +112,7 @@ function ListSection() {
         }))
         return
       }
-
+w
       const completedSessions = nextTask.sessionsCompleted + 1
       const taskCompleted = completedSessions === nextTask.sessionsRequired
       setItems(items.map((item) =>
