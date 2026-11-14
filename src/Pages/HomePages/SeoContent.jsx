@@ -19,9 +19,10 @@ function SeoContent() {
       <header>
         <h2 id="about-pomodoro-title">Free Online Pomodoro Timer for Focus and Study</h2>
         <p>
-          Nox Pomodoro is a simple focus timer and study planner. Set your work
-          and break times, organize tasks by focus sessions, and keep study
-          notes and resources together while you work.
+          Nox Pomodoro is a free online focus timer and study planner for
+          students and anyone organizing focused work. Set custom Pomodoro
+          work and break intervals, track tasks by focus sessions, and keep
+          study notes and PDF resources together on your device.
         </p>
       </header>
 
@@ -52,6 +53,16 @@ function SeoContent() {
         </article>
       </div>
 
+      <article aria-labelledby="nox-focus-flow-title" className="SeoMethod">
+        <h3 id="nox-focus-flow-title">Nox Focus Flow: Focus, Organize, eXecute</h3>
+        <p>
+          Nox Focus Flow is the simple routine behind the planner: focus with a
+          customizable Pomodoro timer, organize work into tasks and sessions,
+          then execute one session at a time. Use it as a study timer, work
+          timer, or lightweight daily focus planner.
+        </p>
+      </article>
+
       <div aria-labelledby="pomodoro-faq-title" className="SeoFaq">
         <h3 id="pomodoro-faq-title">Pomodoro Timer FAQ</h3>
         {questions.map(({ question, answer }) => (
@@ -65,11 +76,11 @@ function SeoContent() {
       <div aria-label="ملخص مؤقّت بومودورو بالعربية" className="SeoArabic">
         <h3>مؤقّت بومودورو لتنظيم التركيز والمهام</h3>
         <p>
-          استخدم Nox Pomodoro كمؤقّت بومودورو مجاني للدراسة والعمل. خصّص مدة
-          جلسات التركيز والاستراحات، وحدد عدد الجلسات لكل مهمة، وتابع تقدمك
-          والوقت المتوقع. يمكنك ربط فيديو YouTube وملاحظات وملفات PDF بكل مهمة.
-          تُحفظ المهام والملاحظات وملفات PDF محليًا في متصفحك على جهازك، ولا
-          تُرفع إلى خادم التطبيق.
+          Nox Pomodoro مؤقّت تركيز ومخطط دراسة مجاني على الإنترنت. خصّص مدة
+          جلسات بومودورو والاستراحات، ونظّم مهامك حسب جلسات التركيز، وتابع
+          إنجازك اليومي. احفظ ملاحظات الدراسة واعرض ملفات PDF على جهازك؛ لا
+          تُرفع هذه البيانات إلى خادم التطبيق. Nox Focus Flow: ركّز، نظّم،
+          وأنجز جلسة واحدة في كل مرة.
         </p>
       </div>
     </section>

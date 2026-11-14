@@ -739,6 +739,24 @@ html {
     }
   }
 
+  .SeoMethod {
+    margin-top: 24px;
+    padding: 18px 20px;
+    border: 1px solid color-mix(in srgb, var(--SpecialColor) 35%, transparent);
+    border-left: 4px solid var(--SpecialColor);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--SpecialColor) 5%, transparent);
+
+    h3 {
+      margin: 0 0 8px;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.7;
+    }
+  }
+
   .SeoFaq {
     margin-top: 30px;
 
