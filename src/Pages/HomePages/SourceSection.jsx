@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react"
 const itemsStorageKey = "Items"
 const sourceStorageKey = "npomodoro.taskSources"
 const databaseName = "npomodoro.source"
-const databaseVersion = 1
+const databaseVersion = 2
 const pdfStoreName = "files"
+const videoStoreName = "videos"
 
 function readTasks() {
   try {
@@ -53,6 +54,9 @@ function openSourceDatabase() {
     request.onupgradeneeded = () => {
       if (!request.result.objectStoreNames.contains(pdfStoreName)) {
         request.result.createObjectStore(pdfStoreName)
+      }
+      if (!request.result.objectStoreNames.contains(videoStoreName)) {
+        request.result.createObjectStore(videoStoreName)
       }
     }
     request.onsuccess = () => resolve(request.result)
@@ -124,6 +128,58 @@ async function deleteSavedPdf(taskId) {
   })
 }
 
+async function getSavedVideo(taskId) {
+  const database = await openSourceDatabase()
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(videoStoreName, "readonly")
+    const request = transaction.objectStore(videoStoreName).get(`task:${taskId}`)
+    let record
+    request.onsuccess = () => {
+      record = request.result
+    }
+    transaction.oncomplete = () => {
+      database.close()
+      resolve(record)
+    }
+    transaction.onerror = () => {
+      database.close()
+      reject(transaction.error ?? new Error("Could not read the saved video."))
+    }
+  })
+}
+
+async function saveVideo(taskId, record) {
+  const database = await openSourceDatabase()
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(videoStoreName, "readwrite")
+    transaction.objectStore(videoStoreName).put(record, `task:${taskId}`)
+    transaction.oncomplete = () => {
+      database.close()
+      resolve()
+    }
+    transaction.onerror = () => {
+      database.close()
+      reject(transaction.error ?? new Error("Could not save the video locally."))
+    }
+  })
+}
+
+async function deleteSavedVideo(taskId) {
+  const database = await openSourceDatabase()
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(videoStoreName, "readwrite")
+    transaction.objectStore(videoStoreName).delete(`task:${taskId}`)
+    transaction.oncomplete = () => {
+      database.close()
+      resolve()
+    }
+    transaction.onerror = () => {
+      database.close()
+      reject(transaction.error ?? new Error("Could not delete the saved video."))
+    }
+  })
+}
+
 function getYoutubeEmbedUrl(value) {
   try {
     const url = new URL(value.trim())
@@ -151,9 +207,12 @@ function SourceSection() {
   const [videoLink, setVideoLink] = useState("")
   const [videoEmbedUrl, setVideoEmbedUrl] = useState("")
   const [videoError, setVideoError] = useState("")
+  const [videoSourceType, setVideoSourceType] = useState("youtube")
   const [storageError, setStorageError] = useState("")
   const [pdf, setPdf] = useState(null)
+  const [localVideo, setLocalVideo] = useState(null)
   const pdfUrlRef = useRef(null)
+  const videoUrlRef = useRef(null)
   const taskSourcesRef = useRef(taskSources)
   const taskIdsRef = useRef(initialTasks.map((task) => task.id))
 
@@ -177,6 +236,9 @@ function SourceSection() {
         removedTaskIds.forEach((id) => {
           deleteSavedPdf(id).catch((error) => {
             console.error("Could not remove a deleted task's PDF.", error)
+          })
+          deleteSavedVideo(id).catch((error) => {
+            console.error("Could not remove a deleted task's local video.", error)
           })
         })
       }
@@ -241,6 +303,41 @@ function SourceSection() {
       isActive = false
       if (pdfUrlRef.current) URL.revokeObjectURL(pdfUrlRef.current)
       pdfUrlRef.current = null
+    }
+  }, [selectedTaskId])
+
+  useEffect(() => {
+    let isActive = true
+    setLocalVideo(null)
+
+    if (!selectedTaskId) return () => {
+      isActive = false
+      if (videoUrlRef.current) URL.revokeObjectURL(videoUrlRef.current)
+      videoUrlRef.current = null
+    }
+
+    async function restoreVideo() {
+      try {
+        const savedVideo = await getSavedVideo(selectedTaskId)
+        if (!isActive || !savedVideo) return
+        if (!(savedVideo.blob instanceof Blob) || typeof savedVideo.name !== "string") {
+          throw new Error("The locally saved video has an invalid format.")
+        }
+
+        const url = URL.createObjectURL(savedVideo.blob)
+        videoUrlRef.current = url
+        setLocalVideo({ taskId: selectedTaskId, name: savedVideo.name, url })
+      } catch (error) {
+        console.error("Could not restore the task video from local storage.", error)
+        if (isActive) setStorageError("تعذر فتح الفيديو المحفوظ على هذا الجهاز.")
+      }
+    }
+
+    restoreVideo()
+    return () => {
+      isActive = false
+      if (videoUrlRef.current) URL.revokeObjectURL(videoUrlRef.current)
+      videoUrlRef.current = null
     }
   }, [selectedTaskId])
 
@@ -317,6 +414,53 @@ function SourceSection() {
     }
   }
 
+  async function selectLocalVideo(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    event.target.value = ""
+
+    if (!selectedTaskId) {
+      setStorageError("Add Task To Connect The Video With It")
+      return
+    }
+    if (!file.type.startsWith("video/")) {
+      setStorageError("Choose a video file only.")
+      return
+    }
+
+    const taskId = selectedTaskId
+    const url = URL.createObjectURL(file)
+    if (videoUrlRef.current) URL.revokeObjectURL(videoUrlRef.current)
+    videoUrlRef.current = url
+    setLocalVideo({ taskId, name: file.name, url })
+    setStorageError("")
+
+    try {
+      await saveVideo(taskId, { name: file.name, blob: file })
+    } catch (error) {
+      console.error("Could not save the task video locally.", error)
+      setStorageError("The video is open for viewing, but could not be saved on this device.")
+    }
+  }
+
+  async function removeLocalVideo() {
+    if (!selectedTaskId) return
+    const taskId = selectedTaskId
+
+    try {
+      await deleteSavedVideo(taskId)
+      if (selectedTaskId === taskId) {
+        if (videoUrlRef.current) URL.revokeObjectURL(videoUrlRef.current)
+        videoUrlRef.current = null
+        setLocalVideo(null)
+        setStorageError("")
+      }
+    } catch (error) {
+      console.error("Could not delete the saved task video.", error)
+      setStorageError("Could not delete the saved video.")
+    }
+  }
+
   const selectedSource = taskSources[selectedTaskId] ?? {}
   const selectedTask = tasks.find((task) => task.id === selectedTaskId)
 
@@ -324,8 +468,8 @@ function SourceSection() {
     <section aria-labelledby="source-title" className="Section SourceSection">
       <div className="SourceHeader">
         <h2 id="source-title">Source</h2>
-        <p>Connect A Video , Pdf , Notes With A Task Every Thing Ofline</p>
-        <p>Youtube Video Play In The Page And Need A Internet</p>
+        <p>Connect YouTube or local videos, PDF files, and notes with a task.</p>
+        <p>YouTube needs internet. Local files stay on this device and play without uploading.</p>
       </div>
 
       {tasks.length > 0 ? (
@@ -349,33 +493,86 @@ function SourceSection() {
 
       <div className="SourceGrid">
         <section className="SourceCard">
-          <h3>YouTube</h3>
-          <form className="SourceVideoForm" onSubmit={showVideo}>
-            <label htmlFor="source-youtube-link">Video Link</label>
-            <div className="SourceInputRow">
+          <h3>Video</h3>
+          <div className="SourceVideoTabs" aria-label="Choose video source">
+            <button
+              aria-pressed={videoSourceType === "youtube"}
+              className={videoSourceType === "youtube" ? "is-active" : ""}
+              onClick={() => setVideoSourceType("youtube")}
+              type="button"
+            >
+              YouTube
+            </button>
+            <button
+              aria-pressed={videoSourceType === "local"}
+              className={videoSourceType === "local" ? "is-active" : ""}
+              onClick={() => setVideoSourceType("local")}
+              type="button"
+            >
+              Video from device
+            </button>
+          </div>
+
+          {videoSourceType === "youtube" ? (
+            <>
+              <form className="SourceVideoForm" onSubmit={showVideo}>
+                <label htmlFor="source-youtube-link">Video Link</label>
+                <div className="SourceInputRow">
+                  <input
+                    autoComplete="url"
+                    disabled={!selectedTask}
+                    id="source-youtube-link"
+                    onChange={(event) => setVideoLink(event.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    type="url"
+                    value={videoLink}
+                  />
+                  <button className="Button" disabled={!selectedTask} type="submit">View</button>
+                </div>
+              </form>
+              {videoError && <p className="SourceError" role="alert">{videoError}</p>}
+              {videoEmbedUrl && (
+                <div className="SourceVideoFrame">
+                  <iframe
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    src={videoEmbedUrl}
+                    title={`YouTube video for ${selectedTask?.content ?? "task"}`}
+                  />
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="SourceLocalVideo">
+              <label className="SourceFileLabel" htmlFor="source-local-video">
+                Choose a video from this device
+              </label>
               <input
-                autoComplete="url"
+                accept="video/*"
                 disabled={!selectedTask}
-                id="source-youtube-link"
-                onChange={(event) => setVideoLink(event.target.value)}
-                placeholder="https://www.youtube.com/watch?v=..."
-                type="url"
-                value={videoLink}
+                id="source-local-video"
+                onChange={selectLocalVideo}
+                type="file"
               />
-              <button className="Button" disabled={!selectedTask} type="submit">View</button>
-            </div>
-          </form>
-          {videoError && <p className="SourceError" role="alert">{videoError}</p>}
-          {videoEmbedUrl && (
-            <div className="SourceVideoFrame">
-              <iframe
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-                src={videoEmbedUrl}
-                title={`YouTube video for ${selectedTask?.content ?? "task"}`}
-              />
+              {localVideo?.taskId === selectedTaskId && (
+                <>
+                  <div className="SourceVideoHeader">
+                    <span>{localVideo.name}</span>
+                    <button className="Button" onClick={removeLocalVideo} type="button">حذف الفيديو</button>
+                  </div>
+                  <video
+                    className="SourceLocalVideoPlayer"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    src={localVideo.url}
+                  >
+                    Your browser does not support local video playback.
+                  </video>
+                </>
+              )}
             </div>
           )}
         </section>

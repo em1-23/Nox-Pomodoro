@@ -660,6 +660,55 @@ html {
       }
     }
 
+    .SourceVideoTabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+
+      button {
+        min-height: 38px;
+        border: 1px solid var(--SpecialColor);
+        border-radius: 7px;
+        color: var(--BackgroundColor);
+        background: transparent;
+        font: inherit;
+        cursor: pointer;
+
+        &.is-active {
+          color: var(--MainColor);
+          background: var(--SpecialColor);
+        }
+      }
+    }
+
+    .SourceLocalVideo {
+      display: grid;
+      gap: 10px;
+    }
+
+    .SourceVideoHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      overflow-wrap: anywhere;
+
+      .Button {
+        flex: 0 0 auto;
+        padding: 0 10px;
+      }
+    }
+
+    .SourceLocalVideoPlayer {
+      width: 100%;
+      max-height: min(60vh, 500px);
+      border: 1px solid color-mix(in srgb, var(--SpecialColor) 35%, transparent);
+      border-radius: 8px;
+      background: #000;
+      object-fit: contain;
+    }
+
     .SourceNotesLabel,
     .SourceFileLabel {
       display: inline-block;
