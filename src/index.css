@@ -1157,6 +1157,223 @@ html {
     }
   }
 
+  .ProgressRangePicker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: -8px 0 18px;
+
+    button {
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid color-mix(in srgb, var(--SpecialColor) 38%, transparent);
+      border-radius: 999px;
+      color: var(--MainColor);
+      background: var(--BackgroundColor);
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+
+      &:hover,
+      &:focus-visible {
+        outline: none;
+        transform: translateY(-1px);
+      }
+
+      &.is-active {
+        border-color: var(--SpecialColor);
+        color: var(--MainColor);
+        background: var(--SpecialColor);
+        box-shadow: 0 5px 16px color-mix(in srgb, var(--SpecialColor) 24%, transparent);
+      }
+    }
+  }
+
+  .ProgressDonutPanel {
+    min-height: 420px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(180px, 260px);
+    align-items: center;
+    gap: clamp(24px, 6vw, 64px);
+    padding: clamp(24px, 5vw, 44px);
+    border: 1px solid color-mix(in srgb, var(--SpecialColor) 25%, transparent);
+    border-radius: 18px;
+    background:
+      radial-gradient(circle at 38% 50%, color-mix(in srgb, var(--SpecialColor) 8%, transparent), transparent 35%),
+      color-mix(in srgb, var(--MainColor) 3%, transparent);
+  }
+
+  .ProgressDonut {
+    width: min(300px, 70vw);
+    aspect-ratio: 1;
+    justify-self: center;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    box-shadow: 0 12px 35px color-mix(in srgb, var(--MainColor) 12%, transparent);
+    animation: progress-donut-in 500ms ease both;
+  }
+
+  .ProgressDonutCore {
+    width: 58%;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid color-mix(in srgb, var(--SpecialColor) 30%, transparent);
+    border-radius: 50%;
+    background: var(--BackgroundColor);
+    box-shadow: inset 0 0 22px color-mix(in srgb, var(--SpecialColor) 8%, transparent);
+    text-align: center;
+
+    strong {
+      color: var(--SpecialColor);
+      font-size: clamp(20px, 4vw, 30px);
+    }
+
+    span {
+      font-size: 12px;
+      opacity: .72;
+    }
+  }
+
+  .ProgressDonutLegend {
+    display: grid;
+    gap: 8px;
+
+    > div {
+      display: grid;
+      grid-template-columns: 10px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 7px 9px;
+      border-bottom: 1px solid color-mix(in srgb, var(--MainColor) 10%, transparent);
+
+      strong {
+        font-size: 12px;
+      }
+
+      small {
+        font-size: 11px;
+        opacity: .7;
+      }
+    }
+  }
+
+  .ProgressLegendDot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--SpecialColor);
+  }
+
+  .ProgressLegendDot--1 {
+    background: color-mix(in srgb, var(--SpecialColor) 72%, var(--MainColor));
+  }
+
+  .ProgressLegendDot--2 {
+    background: color-mix(in srgb, var(--SpecialColor) 44%, var(--MainColor));
+  }
+
+  .ProgressLegendDot--3 {
+    background: color-mix(in srgb, var(--SpecialColor) 24%, var(--MainColor));
+  }
+
+  .ProgressTrendPanel {
+    min-height: 420px;
+    box-sizing: border-box;
+    padding: clamp(14px, 3vw, 24px);
+    border: 1px solid color-mix(in srgb, var(--SpecialColor) 25%, transparent);
+    border-radius: 18px;
+    background:
+      radial-gradient(ellipse at 60% 100%, color-mix(in srgb, var(--SpecialColor) 7%, transparent), transparent 45%),
+      color-mix(in srgb, var(--MainColor) 3%, transparent);
+  }
+
+  .ProgressTrendHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+
+    > div {
+      display: grid;
+      gap: 2px;
+    }
+
+    span {
+      font-size: 11px;
+      opacity: .68;
+    }
+
+    strong {
+      color: var(--SpecialColor);
+      font-size: clamp(20px, 3vw, 28px);
+    }
+  }
+
+  .ProgressTrendChart {
+    width: 100%;
+    max-height: 330px;
+    overflow: visible;
+  }
+
+  .ProgressTrendGrid {
+    stroke: color-mix(in srgb, var(--MainColor) 12%, transparent);
+    stroke-width: 1;
+  }
+
+  .ProgressTrendAxisLabel,
+  .ProgressTrendDate {
+    fill: var(--MainColor);
+    font-size: 9px;
+    opacity: .58;
+  }
+
+  .ProgressTrendArea {
+    fill: color-mix(in srgb, var(--SpecialColor) 12%, transparent);
+  }
+
+  .ProgressTrendLine {
+    fill: none;
+    stroke: var(--SpecialColor);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .ProgressTrendPoint {
+    circle {
+      fill: var(--BackgroundColor);
+      stroke: var(--SpecialColor);
+      stroke-width: 4;
+      vector-effect: non-scaling-stroke;
+      transition: r 160ms ease, fill 160ms ease;
+    }
+
+    &:hover circle {
+      r: 8;
+      fill: var(--SpecialColor);
+    }
+  }
+
+  @keyframes progress-donut-in {
+    from {
+      opacity: 0;
+      transform: scale(.94) rotate(-8deg);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotate(0);
+    }
+  }
+
   .ProgressNetwork {
     position: relative;
     isolation: isolate;
@@ -1630,6 +1847,37 @@ html {
       min-height: 76px;
       padding: 7px 5px;
       border-radius: 7px;
+    }
+
+    .ProgressRangePicker {
+      gap: 5px;
+      margin: 0 0 14px;
+
+      button {
+        flex: 1 1 calc(50% - 5px);
+        padding: 6px 8px;
+        font-size: 11px;
+      }
+    }
+
+    .ProgressDonutPanel {
+      min-height: 0;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      padding: 18px 12px;
+    }
+
+    .ProgressDonut {
+      width: min(230px, 78vw);
+    }
+
+    .ProgressTrendPanel {
+      min-height: 300px;
+      padding: 12px 8px;
+    }
+
+    .ProgressTrendChart {
+      min-height: 270px;
     }
 
     .ProgressNetwork {

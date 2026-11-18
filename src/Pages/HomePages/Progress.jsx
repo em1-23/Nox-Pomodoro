@@ -2,7 +2,14 @@ import { useEffect, useState } from "react"
 
 const storageKey = "npomodoro.dailyProgress"
 const historyStorageKey = "npomodoro.sessionHistory"
-const historyDays = 7
+const rangeStorageKey = "npomodoro.progressRange"
+const retentionDays = 90
+const ranges = [
+  { key: "24h", label: "Last 24 hours", days: 1 },
+  { key: "7d", label: "Last 7 days", days: 7 },
+  { key: "30d", label: "Last 30 days", days: 30 },
+  { key: "90d", label: "Last 90 days", days: 90 },
+]
 const networkWires = [
   "M 355 205 C 286 146 202 86 110 46",
   "M 445 205 C 514 146 598 86 690 46",
@@ -32,11 +39,11 @@ function getLocalDateKey(date) {
 function getEarliestHistoryDate(date = new Date()) {
   const earliestDate = new Date(date)
   earliestDate.setHours(0, 0, 0, 0)
-  earliestDate.setDate(earliestDate.getDate() - (historyDays - 1))
+  earliestDate.setDate(earliestDate.getDate() - (retentionDays - 1))
   return getLocalDateKey(earliestDate)
 }
 
-function getLastDays(today) {
+function getLastDays(today, historyDays) {
   return Array.from({ length: historyDays }, (_, index) => {
     const date = new Date(`${today}T12:00:00`)
     date.setDate(date.getDate() - (historyDays - index - 1))
@@ -102,6 +109,47 @@ function formatDuration(minutes) {
   return remainingMinutes === 0 ? `${hours}h` : `${hours}h ${remainingMinutes}m`
 }
 
+function buildDailySeries(sessionHistory, today, dayCount) {
+  const days = getLastDays(today, dayCount)
+  return days.map((day) => ({
+    ...day,
+    sessions: sessionHistory.filter(
+      (session) => getLocalDateKey(new Date(session.completedAt)) === day.key,
+    ).length,
+    focusMinutes: sessionHistory
+      .filter((session) => getLocalDateKey(new Date(session.completedAt)) === day.key)
+      .reduce((sum, session) => sum + session.durationMinutes, 0),
+  }))
+}
+
+function buildTrendPoints(series) {
+  const width = 760
+  const height = 300
+  const left = 40
+  const right = 20
+  const top = 24
+  const bottom = 48
+  const maxValue = Math.max(60, ...series.map((point) => point.focusMinutes))
+  const plotWidth = width - left - right
+  const plotHeight = height - top - bottom
+
+  const points = series.map((point, index) => {
+    const x = series.length === 1
+      ? left + plotWidth / 2
+      : left + (index / (series.length - 1)) * plotWidth
+    const y = top + plotHeight - (point.focusMinutes / maxValue) * plotHeight
+    return { x, y, ...point }
+  })
+  const line = points.map((point, index) =>
+    `${index === 0 ? "M" : "L"} ${point.x.toFixed(1)} ${point.y.toFixed(1)}`,
+  ).join(" ")
+  const area = points.length > 0
+    ? `${line} L ${points.at(-1).x.toFixed(1)} ${top + plotHeight} L ${points[0].x.toFixed(1)} ${top + plotHeight} Z`
+    : ""
+
+  return { width, height, left, top, plotWidth, plotHeight, maxValue, points, line, area }
+}
+
 function Progress() {
   const [initialData] = useState(loadProgress)
   const [initialHistory] = useState(loadSessionHistory)
@@ -110,6 +158,14 @@ function Progress() {
   const [storageError, setStorageError] = useState(initialData.error)
   const [historyStorageError, setHistoryStorageError] = useState(initialHistory.error)
   const [today, setToday] = useState(() => getLocalDateKey(new Date()))
+  const [selectedRange, setSelectedRange] = useState(() => {
+    try {
+      const savedRange = window.localStorage.getItem(rangeStorageKey)
+      return ranges.some((range) => range.key === savedRange) ? savedRange : "7d"
+    } catch {
+      return "7d"
+    }
+  })
   const [hoveredDay, setHoveredDay] = useState(null)
   const [pinnedDay, setPinnedDay] = useState(null)
   const [hoveredSessionId, setHoveredSessionId] = useState(null)
@@ -141,6 +197,14 @@ function Progress() {
     }, 60_000)
     return () => window.clearInterval(intervalId)
   }, [])
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(rangeStorageKey, selectedRange)
+    } catch (error) {
+      console.error("Could not save the selected progress range.", error)
+    }
+  }, [selectedRange])
 
   useEffect(() => {
     function handleWorkSessionRecorded(event) {
@@ -185,7 +249,8 @@ function Progress() {
     return () => window.removeEventListener("pomodoro:work-session-recorded", handleWorkSessionRecorded)
   }, [])
 
-  const days = getLastDays(today)
+  const selectedRangeConfig = ranges.find((range) => range.key === selectedRange) ?? ranges[1]
+  const days = getLastDays(today, selectedRangeConfig.days)
   const dayCounts = days.map((day) => dailyProgress[day.key]?.sessions ?? 0)
   const todayStats = dailyProgress[today] ?? { sessions: 0, focusMinutes: 0 }
   const weeklySessions = dayCounts.reduce((sum, count) => sum + count, 0)
@@ -205,12 +270,56 @@ function Progress() {
     daySessions.sort((first, second) => Date.parse(second.completedAt) - Date.parse(first.completedAt))
   })
 
+  const cutoff24h = Date.now() - 24 * 60 * 60 * 1000
+  const sessions24h = sessionHistory.filter(
+    (session) => Date.parse(session.completedAt) >= cutoff24h,
+  )
+  const hourlySegments = [0, 0, 0, 0]
+  sessions24h.forEach((session) => {
+    const hoursAgo = (Date.now() - Date.parse(session.completedAt)) / (60 * 60 * 1000)
+    const segment = Math.min(3, Math.max(0, Math.floor(hoursAgo / 6)))
+    hourlySegments[3 - segment] += session.durationMinutes
+  })
+  const total24hMinutes = hourlySegments.reduce((sum, minutes) => sum + minutes, 0)
+  const segmentPercentages = hourlySegments.map((minutes) =>
+    total24hMinutes > 0 ? (minutes / total24hMinutes) * 100 : 0,
+  )
+  const segmentStarts = [0]
+  segmentPercentages.forEach((percentage) => {
+    segmentStarts.push(segmentStarts.at(-1) + percentage)
+  })
+  const donutGradient = total24hMinutes > 0
+    ? `conic-gradient(
+        var(--SpecialColor) 0 ${segmentStarts[1]}%,
+        color-mix(in srgb, var(--SpecialColor) 72%, var(--MainColor)) ${segmentStarts[1]}% ${segmentStarts[2]}%,
+        color-mix(in srgb, var(--SpecialColor) 44%, var(--MainColor)) ${segmentStarts[2]}% ${segmentStarts[3]}%,
+        color-mix(in srgb, var(--SpecialColor) 24%, var(--MainColor)) ${segmentStarts[3]}% ${segmentStarts[4]}%
+      )`
+    : "conic-gradient(color-mix(in srgb, var(--MainColor) 12%, transparent) 0 100%)"
+
+  const trendSeries = buildDailySeries(sessionHistory, today, selectedRangeConfig.days)
+  const trend = buildTrendPoints(trendSeries)
+
   return (
     <section aria-labelledby="daily-progress-title" className="Section ProgressSection">
       <header className="ProgressHeader">
         <h2 id="daily-progress-title">Daily Progress</h2>
         <p>Your focus, mapped into a personal session network.</p>
       </header>
+
+      <div aria-label="Progress date range" className="ProgressRangePicker">
+        {ranges.map((range) => (
+          <button
+            aria-pressed={selectedRange === range.key}
+            className={selectedRange === range.key ? "is-active" : ""}
+            key={range.key}
+            onClick={() => setSelectedRange(range.key)}
+            type="button"
+          >
+            {range.label}
+          </button>
+        ))}
+      </div>
 
       {(storageError || historyStorageError) && (
         <p className="ProgressError" role="alert">{storageError || historyStorageError}</p>
@@ -226,13 +335,96 @@ function Progress() {
           <strong>{todayHours}h {todayMinutes}m</strong>
         </article>
         <article className="ProgressStat">
-          <span>Sessions this week</span>
-          <strong>{weeklySessions}</strong>
+          <span>{selectedRangeConfig.label}</span>
+          <strong>{trendSeries.reduce((sum, point) => sum + point.sessions, 0)}</strong>
         </article>
       </div>
 
+      {selectedRange === "24h" && (
+        <div className="ProgressDonutPanel">
+          <div
+            aria-label={`Focus time in the last 24 hours: ${formatDuration(total24hMinutes)}`}
+            className="ProgressDonut"
+            role="img"
+            style={{ background: donutGradient }}
+          >
+            <div className="ProgressDonutCore">
+              <strong>{formatDuration(total24hMinutes)}</strong>
+              <span>{sessions24h.length} {sessions24h.length === 1 ? "session" : "sessions"}</span>
+            </div>
+          </div>
+          <div className="ProgressDonutLegend">
+            {[
+              ["18–24h", hourlySegments[0]],
+              ["12–18h", hourlySegments[1]],
+              ["6–12h", hourlySegments[2]],
+              ["0–6h", hourlySegments[3]],
+            ].map(([label, minutes], index) => (
+              <div key={label}>
+                <span className={`ProgressLegendDot ProgressLegendDot--${index}`} />
+                <strong>{label}</strong>
+                <small>{formatDuration(minutes)}</small>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(selectedRange === "30d" || selectedRange === "90d") && (
+        <div className="ProgressTrendPanel">
+          <div className="ProgressTrendHeader">
+            <div>
+              <span>Focus trend</span>
+              <strong>{formatDuration(trendSeries.reduce((sum, point) => sum + point.focusMinutes, 0))}</strong>
+            </div>
+            <span>{selectedRangeConfig.label}</span>
+          </div>
+          <svg
+            aria-label={`Daily focus minutes over ${selectedRangeConfig.label.toLowerCase()}`}
+            className="ProgressTrendChart"
+            role="img"
+            viewBox={`0 0 ${trend.width} ${trend.height}`}
+          >
+            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+              const y = trend.top + trend.plotHeight * ratio
+              return (
+                <g key={ratio}>
+                  <line className="ProgressTrendGrid" x1={trend.left} x2={trend.width - 20} y1={y} y2={y} />
+                  <text className="ProgressTrendAxisLabel" x="2" y={y + 4}>
+                    {formatDuration(Math.round(trend.maxValue * (1 - ratio)))}
+                  </text>
+                </g>
+              )
+            })}
+            <path className="ProgressTrendArea" d={trend.area} />
+            <path className="ProgressTrendLine" d={trend.line} />
+            {trend.points.map((point, index) => (
+              <g className="ProgressTrendPoint" key={point.key}>
+                <circle cx={point.x} cy={point.y} r="5" />
+                <title>{`${point.dateLabel}: ${formatDuration(point.focusMinutes)}, ${point.sessions} sessions`}</title>
+                {(
+                  selectedRange === "30d"
+                    ? index % 5 === 0 || index === trend.points.length - 1
+                    : index % 10 === 0 || index === trend.points.length - 1
+                ) && (
+                  <text
+                    className="ProgressTrendDate"
+                    textAnchor={index === 0 ? "start" : index === trend.points.length - 1 ? "end" : "middle"}
+                    x={point.x}
+                    y={trend.height - 16}
+                  >
+                    {point.dateLabel}
+                  </text>
+                )}
+              </g>
+            ))}
+          </svg>
+        </div>
+      )}
+
+      {selectedRange === "7d" && (
       <div
-        aria-label={`Focus session network for the last ${historyDays} days`}
+        aria-label={`Focus session network for the last ${selectedRangeConfig.days} days`}
         className={`ProgressNetwork ${activeDay ? "has-active" : ""}`}
         data-active-day={activeDay ? days.findIndex((day) => day.key === activeDay) : ""}
         role="group"
@@ -385,6 +577,7 @@ function Progress() {
           })}
         </div>
       </div>
+      )}
 
       <p className="ProgressStorageNote">
         Session details are saved locally in this browser. Hover over or select a day branch, then a session, to explore it.
