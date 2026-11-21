@@ -46,7 +46,10 @@ html {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
+  position: fixed;
+  top: 0%;
+  background-color: var(--Background-Color);
+  z-index: 1011;
   .fa-gear {
     color: var(--MainColor);
   }
@@ -91,7 +94,7 @@ html {
   justify-content: space-around;
   width: 70%;
   margin: 2.5% auto;
-
+  margin-top: 8%;
   .LeftSlider {
     text-align: center;
     padding: 15px;
@@ -431,14 +434,9 @@ html {
           transform: none;
           box-shadow: none;
           font-size: 20px;
-
-          &:hover {
+          &:hover{
             background-color: var(--SpecialColor);
-            color: var(--MainColor);
-
-            & .fa-plus {
-              rotate: 180deg;
-            }
+            color: var(--Background-Color);
           }
         }
       }
@@ -474,11 +472,19 @@ html {
     align-items: center;
     gap: 12px;
     padding: 12px;
-    border: 1px solid #e0e0e0;
-    border-left: 7.5px solid var(--MainColor);
+    --ColorAll:var(--MainColor);
+    border: 1px solid var(--ColorAll);
+    border-left: 7.5px solid var(--ColorAll);
     border-radius: 5px;
     margin: 5px 0;
-
+    
+    &:has(.TaskContent.Done){
+      --ColorAll:green;
+      .DeleteTask {
+        --BorderColor:var(--ColorAll);
+      }
+    }
+    
     .TaskContent {
       flex: 1;
       overflow-wrap: anywhere;
@@ -486,8 +492,6 @@ html {
 
       &.Done {
         color: green;
-
-        /* text-decoration: 1px green; */
         &::after {
           width: 70%;
           height: 1px;
@@ -503,7 +507,7 @@ html {
 
     .TaskSessions {
       white-space: nowrap;
-      color: var(--MainColor);
+      color: var(--ColorAll);
       font-size: 0.9rem;
     }
 
@@ -512,12 +516,17 @@ html {
       height: 40px;
       display: flex;
       align-items: center;
+      --BorderColor:var(--MainColor);
       justify-content: center;
-      border: 1px solid var(--SpecialColor);
+      border: 1px solid var(--BorderColor);
       border-radius: 5px;
       background-color: transparent;
-      color: var(--MainColor);
+      color: var(--BorderColor);
       cursor: pointer;
+      &:hover{
+        background-color: var(--BorderColor);
+        color: white;
+      }
     }
   }
 
